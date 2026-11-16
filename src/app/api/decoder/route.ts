@@ -1,4 +1,4 @@
-import { desc, eq } from "drizzle-orm";
+import { and, desc, eq } from "drizzle-orm";
 import { db } from "@/db";
 import { billAnalyses } from "@/db/schema";
 import { decodeBill } from "@/lib/decoder";
@@ -46,6 +46,26 @@ export async function POST(req: Request) {
   const name = analysis.meta.provider ? analysis.meta.providerName : "Telco";
   const title = str(body.title, 120) ?? `${name} bill${analysis.meta.billDate ? ` · ${analysis.meta.billDate}` : ""}`;
 
+  // Decoding the same text with the same answers again refreshes the existing entry instead of saving a duplicate.
+  const inputs = { provider, promisedPrice, usualAmount };
+  const same = await db
+    .select({ id: billAnalyses.id, inputs: billAnalyses.inputs })
+    .from(billAnalyses)
+    .where(and(eq(billAnalyses.userId, userId), eq(billAnalyses.rawText, text)));
+  // Compare field by field: Postgres jsonb reorders keys, so stringified JSON never matches.
+  const dup = same.find((r) => {
+    const i = (r.inputs ?? {}) as Partial<typeof inputs>;
+    return (i.provider ?? "") === inputs.provider && (i.promisedPrice ?? null) === inputs.promisedPrice && (i.usualAmount ?? null) === inputs.usualAmount;
+  });
+  if (dup) {
+    const [row] = await db
+      .update(billAnalyses)
+      .set({ title, provider: analysis.meta.provider, source, result: analysis, total: analysis.totals.total, score: analysis.score, createdAt: new Date() })
+      .where(eq(billAnalyses.id, dup.id))
+      .returning({ id: billAnalyses.id, createdAt: billAnalyses.createdAt });
+    return Response.json({ id: row.id, title, createdAt: row.createdAt, analysis, reused: true });
+  }
+
   const [row] = await db
     .insert(billAnalyses)
     .values({
@@ -54,7 +74,7 @@ export async function POST(req: Request) {
       provider: analysis.meta.provider,
       source,
       rawText: text,
-      inputs: { provider, promisedPrice, usualAmount },
+      inputs,
       result: analysis,
       total: analysis.totals.total,
       score: analysis.score,

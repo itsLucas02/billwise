@@ -45,11 +45,26 @@ export function DecoderClient({ initialSample }: { initialSample?: string }) {
   const [error, setError] = useState("");
   const [result, setResult] = useState<Result | null>(null);
   const [history, setHistory] = useState<HistoryItem[]>([]);
+  const [showAllHistory, setShowAllHistory] = useState(false);
+  const [deletedNote, setDeletedNote] = useState("");
   const resultRef = useRef<HTMLDivElement>(null);
   const started = useRef(false);
 
   const loadHistory = useCallback(() => {
-    api<{ items: HistoryItem[] }>("/api/decoder").then((d) => setHistory(d.items)).catch(() => {});
+    api<{ items: HistoryItem[] }>("/api/decoder")
+      .then((d) => {
+        setHistory(d.items);
+        try {
+          const t = sessionStorage.getItem("bw_deleted"); // set by the saved-bill page after a delete
+          if (t) {
+            sessionStorage.removeItem("bw_deleted");
+            setDeletedNote(`Deleted “${t}”.`);
+          }
+        } catch {
+          /* storage blocked: no note */
+        }
+      })
+      .catch(() => {});
   }, []);
 
   const analyse = useCallback(
@@ -302,10 +317,11 @@ export function DecoderClient({ initialSample }: { initialSample?: string }) {
 
         <aside className="space-y-5">
           <Card>
-            <h2 className="flex items-center gap-2 font-display text-lg font-bold"><History className="h-5 w-5" /> Your decoded bills</h2>
+            <h2 className="flex items-center gap-2 font-display text-lg font-bold"><History className="h-5 w-5" /> Your decoded bills{history.length > 0 && <span className="font-sans text-base font-semibold text-muted">({history.length})</span>}</h2>
+            {deletedNote && <p role="status" className="mt-2 rounded-xl bg-pandan-soft px-3 py-2 text-sm font-semibold text-pandan-dark">{deletedNote}</p>}
             {history.length ? (
               <ul className="mt-3 space-y-2">
-                {history.slice(0, 6).map((h) => (
+                {(showAllHistory ? history : history.slice(0, 6)).map((h) => (
                   <li key={h.id}>
                     <Link href={`/decoder/${h.id}`} className="flex items-center justify-between gap-3 rounded-2xl border border-line px-3 py-2.5 transition hover:border-ink/30">
                       <span className="min-w-0">
@@ -319,6 +335,11 @@ export function DecoderClient({ initialSample }: { initialSample?: string }) {
               </ul>
             ) : (
               <p className="mt-2 text-muted">Bills you decode are saved here on this browser.</p>
+            )}
+            {history.length > 6 && (
+              <button type="button" onClick={() => setShowAllHistory((v) => !v)} className={cn(btn.ghost, btnSm, "mt-2 w-full")}>
+                {showAllHistory ? "Show fewer" : `Show all ${history.length}`}
+              </button>
             )}
           </Card>
           <Card className="bg-cream/50">

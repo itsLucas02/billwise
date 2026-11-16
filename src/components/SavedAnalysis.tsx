@@ -23,6 +23,11 @@ export function SavedAnalysis({ id }: { id: string }) {
 
   async function remove() {
     await api(`/api/decoder/${id}`, { method: "DELETE" }); // errors surface in ConfirmDelete
+    try {
+      sessionStorage.setItem("bw_deleted", data?.title ?? "the decoded bill");
+    } catch {
+      /* storage blocked: the decoder just won't show the note */
+    }
     router.push("/decoder");
   }
 
