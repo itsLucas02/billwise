@@ -5,6 +5,7 @@ BillWise is an entry for the [Build for Better Connectivity](https://krackeddevs
 - Live: <https://billwise-blush.vercel.app>
 - Repo: <https://github.com/itsLucas02/billwise>
 - Copy-paste submission text: [`SUBMISSION.md`](SUBMISSION.md)
+- Official brief, verbatim: [`BOUNTY-BRIEF.md`](BOUNTY-BRIEF.md) (source of truth for the rules)
 
 ## The one choice
 
@@ -25,7 +26,7 @@ The rest of the app (plan finder, coverage notes, provider directory) supports t
 | 3 | Link to working tool | <https://billwise-blush.vercel.app> |
 | 4 | Short description: who, problem, how to use | [`SUBMISSION.md`](SUBMISSION.md) and the top of the README |
 | 5 | Sample or synthetic data, simulated things labelled | Sample bills are invented and labelled as specimens. Savings figures are estimates and show their assumptions. Coverage results are what the user recorded |
-| 6 | No private data, proprietary systems or unpermitted branding | No customer data, no provider APIs or scraping. See the open risk below |
+| 6 | No private data, proprietary systems, or provider name/logo/branding without permission | No customer data, no provider APIs or scraping, no logos. Real provider names and badge colours are used: see the open risk below |
 
 ## Judge journey
 
@@ -48,4 +49,4 @@ The rest of the app (plan finder, coverage notes, provider directory) supports t
 
 Decision (owner): use the real Malaysian telco names (Unifi, Maxis, CelcomDigi, TIME, Allo, U Mobile). Plan data comes from their public pages, checked Nov 2026. BillWise is independent and not affiliated with any of them.
 
-Risk, still open: requirement 6 says not to use a provider's "name ... without permission". Real names are used so the tool is useful to real customers, and no permission has been requested. If judges read that rule strictly, this entry may be marked down or disqualified. The history shows an earlier commit that used fictional providers; reverting to that is the fallback if the risk is judged too high.
+Risk, still open: the official requirement 6 (confirmed against the brief, see [`BOUNTY-BRIEF.md`](BOUNTY-BRIEF.md)) says "Do not use … a provider’s name, logo, or branding without permission." The body text of the brief says "branding" only, and the Plan Fit idea allows "clearly sourced, dated plans", so the rule can be read either way. Real names are used so the tool is useful to real customers, and no permission has been requested. If judges read that rule strictly, this entry may be marked down or disqualified. The history shows an earlier commit that used fictional providers; reverting to that is the fallback if the risk is judged too high.
