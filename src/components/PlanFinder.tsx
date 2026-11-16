@@ -10,6 +10,7 @@ import { PLANS, PLANS_REVIEWED, contractLabel, dataLabel, getPlan, headline, typ
 import { PROVIDERS, PROVIDER_IDS, type ProviderId } from "@/lib/providers";
 import type { Activity, RecommendResult, Recommendation } from "@/lib/recommend";
 import { rmShort, speedLabel, withSST } from "@/lib/format";
+import { PlanAssistant } from "./PlanAssistant";
 import { Badge, Card, EmptyState, ProviderBadge, btn, btnSm, cn } from "./ui";
 
 export interface FinderInitial {
@@ -154,6 +155,8 @@ export function PlanFinder({ initial }: { initial: FinderInitial }) {
   const [goodSignal, setGoodSignal] = useState<ProviderId[]>([]);
 
   const [result, setResult] = useState<RecommendResult | null>(null);
+  // The answers behind the visible ranking, so the assistant explains exactly what is on screen.
+  const [asked, setAsked] = useState<{ n: number; body: Record<string, unknown> } | null>(null);
   const [showAll, setShowAll] = useState(false);
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState("");
@@ -180,6 +183,7 @@ export function PlanFinder({ initial }: { initial: FinderInitial }) {
           : { kind, budget: mBudget, usage, lines, hotspot, roaming, goodSignal };
       const r = await api<RecommendResult>("/api/plans/recommend", { method: "POST", json: body });
       setResult(r);
+      setAsked((a) => ({ n: (a?.n ?? 0) + 1, body }));
       setTimeout(() => resultsRef.current?.scrollIntoView({ behavior: "smooth", block: "start" }), 50);
     } catch (e) {
       setError(e instanceof Error ? e.message : "Could not load recommendations.");
@@ -379,6 +383,7 @@ export function PlanFinder({ initial }: { initial: FinderInitial }) {
                     {showAll ? "Show top 6 only" : `Show all ${recs.length} ranked plans`}
                   </button>
                 )}
+                {asked && <PlanAssistant key={asked.n} prefs={asked.body} />}
               </section>
             )}
           </div>

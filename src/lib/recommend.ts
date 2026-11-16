@@ -1,5 +1,5 @@
 import { PLANS, costForLines, type Plan } from "./plans";
-import { PROVIDERS, type ProviderId } from "./providers";
+import { PROVIDERS, isProviderId, type ProviderId } from "./providers";
 import { round2, rmShort, speedLabel, withSST } from "./format";
 
 export type Activity = "streaming" | "gaming" | "wfh" | "uploads" | "smarthome";
@@ -253,4 +253,63 @@ function scoreMobile(p: MobilePrefs): RecommendResult {
 
 export function recommend(prefs: Prefs): RecommendResult {
   return prefs.kind === "fibre" ? scoreFibre(prefs) : scoreMobile(prefs);
+}
+
+const between = (v: unknown, lo: number, hi: number, fallback: number) => {
+  const n = typeof v === "number" ? v : typeof v === "string" && v.trim() !== "" ? Number(v) : NaN;
+  return Number.isFinite(n) ? Math.max(lo, Math.min(hi, n)) : fallback;
+};
+const providerList = (v: unknown): ProviderId[] => (Array.isArray(v) ? v.filter(isProviderId) : []);
+const pick = <T extends string>(v: unknown, options: readonly T[], fallback: T): T => (options.includes(v as T) ? (v as T) : fallback);
+const ACTIVITIES = Object.keys(ACTIVITY_LABEL) as Activity[];
+
+/** Validate untrusted Plan Finder answers (request body) into Prefs, with safe defaults. */
+export function parsePrefs(body: Record<string, unknown>): Prefs {
+  if (body.kind === "mobile") {
+    return {
+      kind: "mobile",
+      budget: Math.round(between(body.budget, 20, 600, 80) * 100) / 100,
+      usage: pick(body.usage, ["light", "moderate", "heavy", "max"] as const, "moderate"),
+      lines: Math.round(between(body.lines, 1, 6, 1)),
+      hotspot: Boolean(body.hotspot),
+      roaming: pick(body.roaming, ["never", "sometimes", "often"] as const, "sometimes"),
+      goodSignal: providerList(body.goodSignal),
+    };
+  }
+  return {
+    kind: "fibre",
+    budget: Math.round(between(body.budget, 40, 800, 150) * 100) / 100,
+    people: Math.round(between(body.people, 1, 12, 2)),
+    activities: Array.isArray(body.activities) ? body.activities.filter((a): a is Activity => ACTIVITIES.includes(a as Activity)) : [],
+    homeSize: pick(body.homeSize, ["small", "medium", "large"] as const, "medium"),
+    flexible: Boolean(body.flexible),
+    postpaidWith: isProviderId(body.postpaidWith) ? body.postpaidWith : "",
+    available: providerList(body.available),
+  };
+}
+
+/** The answers behind a ranking, as readable lines for the Plan Finder assistant. */
+export function describePrefs(p: Prefs): string[] {
+  const names = (ids?: ProviderId[]) => (ids ?? []).map((id) => PROVIDERS[id].name).join(", ");
+  if (p.kind === "mobile") {
+    return [
+      "Looking for: mobile postpaid",
+      `Budget: ${rmShort(p.budget)}/month in total`,
+      `Usage: ${p.usage} (about ${USAGE_GB[p.usage]}GB a month per line)`,
+      `Lines: ${p.lines}`,
+      `Needs hotspot: ${p.hotspot ? "yes" : "no"}`,
+      `Travels abroad: ${p.roaming}`,
+      p.goodSignal?.length ? `Good signal where they are (their own report): ${names(p.goodSignal)}` : "Signal: not given",
+    ];
+  }
+  return [
+    "Looking for: home fibre",
+    `Budget: ${rmShort(p.budget)}/month`,
+    `People at home: ${p.people}`,
+    `Activities: ${p.activities.length ? p.activities.map((a) => ACTIVITY_LABEL[a]).join(", ") : "none picked"}`,
+    `Home size: ${p.homeSize}`,
+    `Wants no contract: ${p.flexible ? "yes" : "no"}`,
+    p.postpaidWith ? `Already has postpaid with: ${PROVIDERS[p.postpaidWith].name}` : "No existing postpaid bundle",
+    p.available?.length ? `Confirmed available at their address (their own check): ${names(p.available)}` : "Coverage at their address: not confirmed",
+  ];
 }

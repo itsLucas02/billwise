@@ -1,6 +1,6 @@
 # ADR 0001: AI rewrites enquiry drafts only; the rule engine stays the source of truth
 
-- Status: accepted
+- Status: accepted; amended by [ADR 0002](0002-plan-finder-assistant-explains-ranking-only.md), which adds a Plan Finder assistant under the same rule
 - Date: 2026-11-16
 
 ## Context
