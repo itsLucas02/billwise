@@ -24,22 +24,16 @@ Never copy this token into a file, commit, or log.
 
 ## Which BWS project
 
-| Field | Value |
-| --- | --- |
-| BWS project | `MediBrave CMS` |
-| BWS project id | `653881dd-a297-43cd-80ad-b4ab00afdfd6` |
-| BWS organization id | `fe8a06b5-200d-4120-9992-b4ab00aef64e` |
-
-BillWise **does not have its own BWS project and must not get one.** It reuses the existing `MediBrave CMS` project, namespaced by the `BILLWISE__` key prefix. Keys in that project are grouped by prefix: `DEVELOPMENT__*`, `MEDIBRAVE__*`, `MAMAKAN__*`, `UJIYO__*`, `PAPERLY__*`, `BILLWISE__*`.
+BillWise **does not have its own BWS project and must not get one.** It reuses an existing shared project the access token can read, namespaced by the `BILLWISE__` key prefix. The project name and IDs are kept privately, not in this public repo. `bws secret list` with the token above returns the keys it can see.
 
 ## BillWise secrets
 
-All under the `BILLWISE__` prefix inside `MediBrave CMS`. Values are intentionally not recorded here.
+All under the `BILLWISE__` prefix. Values are intentionally not recorded here.
 
 | Key | Meaning |
 | --- | --- |
 | `BILLWISE__SUPABASE_PROJECT_REF` | Supabase project ref |
-| `BILLWISE__SUPABASE_ORG_ID` | Supabase org (Mamakan Inc) |
+| `BILLWISE__SUPABASE_ORG_ID` | Supabase org |
 | `BILLWISE__SUPABASE_URL` | `https://<ref>.supabase.co` |
 | `BILLWISE__SUPABASE_REGION` | `ap-southeast-1` |
 | `BILLWISE__DB_PASSWORD` | Postgres password |
@@ -79,11 +73,9 @@ chmod 600 .env
 
 ## Supabase project facts
 
-- Organization: **Mamakan Inc** (5th Supabase account, BWS secret `MAMAKAN__SUPABASE_ACCESS_TOKEN`)
-- Project name: `billwise`, ref `wbyahwwaxafafgsgrnkt`
+- Project name: `billwise`; the ref is in `BILLWISE__SUPABASE_PROJECT_REF`
 - Region: Southeast Asia (Singapore), `ap-southeast-1`
 - Postgres: 17.11
-- Dashboard: `https://supabase.com/dashboard/project/wbyahwwaxafafgsgrnkt`
 
 ## Connection gotchas
 
@@ -101,4 +93,8 @@ BillWise talks to Postgres directly through `pg` + Drizzle. It does **not** use 
 ## Rotating credentials
 
 - **DB password:** reset it in the Supabase dashboard, then update `BILLWISE__DB_PASSWORD`, `BILLWISE__DATABASE_URL_SESSION`, and local `.env` together. A mismatch breaks the app at startup.
-- **Supabase access token:** stored account-wide as `MAMAKAN__SUPABASE_ACCESS_TOKEN`; it is not BillWise-specific.
+- **Supabase access token:** stored account-wide in BWS; it is not BillWise-specific.
+
+## Deploying
+
+The Vercel project belongs to a different account from the default `vercel` CLI login, and git pushes do not auto-deploy. Deploy with that account's token from BWS (`SHARED__VERCEL_SECONDARY_TOKEN`), passed as `vercel deploy --prod --token "$T"` without echoing it.

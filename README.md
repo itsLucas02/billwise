@@ -141,7 +141,7 @@ Production is live at **<https://billwise-blush.vercel.app>**.
 | Field | Value |
 | --- | --- |
 | Platform | Vercel |
-| Scope | `dreamin-x` team (account `adreamin96-6176`) |
+| Scope | `dreamin-x` team |
 | Project | `billwise` (`prj_zPXpnhBKj4R6Sxmp45QcOSXipcKD`) |
 | Region | Singapore (`sin1`) — same region as the Supabase database |
 | Production alias | <https://billwise-blush.vercel.app> |
