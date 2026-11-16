@@ -184,7 +184,7 @@ export const PROVIDERS: Record<ProviderId, Provider> = {
     id: "yes",
     name: "Yes",
     company: "YTL Communications Sdn Bhd",
-    color: "#111111",
+    color: "#E6007E", // Yes magenta, darkened just enough for 4.5:1 with white badge text
     ink: "#ffffff",
     services: ["mobile"],
     blurb: "YTL's 5G mobile network with no-contract postpaid plans, many with uncapped data.",
