@@ -12,6 +12,7 @@ import type { Activity, RecommendResult, Recommendation } from "@/lib/recommend"
 import { summariseRerank } from "@/lib/recommend";
 import { rmShort, speedLabel, withSST } from "@/lib/format";
 import { PlanAssistant } from "./PlanAssistant";
+import { ProviderArt } from "./ProviderArt";
 import { Badge, Card, EmptyState, ProviderBadge, btn, btnSm, cn } from "./ui";
 
 export interface FinderInitial {
@@ -51,6 +52,8 @@ function PlanCard({
     <article className={cn("relative flex flex-col rounded-3xl border bg-white p-5 shadow-card", rank === 0 ? "border-ink/40 ring-2 ring-kunyit" : "border-line")}>
       {/* Provider accent: the same flat colour as the provider badge; no logos (bounty rule 6), no gradients. */}
       <span aria-hidden className="pointer-events-none absolute inset-x-8 top-0 h-1.5 rounded-b-full" style={{ backgroundColor: color }} />
+      {/* Provider artwork: an abstract motif per provider (not a logo), faint enough for 4.5:1 text contrast in the worst case. */}
+      <ProviderArt id={plan.provider} className="pointer-events-none absolute right-3 top-6 h-40 w-40 rounded-2xl" style={{ color, opacity: 0.14 }} />
       {rec && (
         <span className={cn("absolute -top-3 left-5 rounded-full px-3 py-0.5 text-sm font-bold", rank === 0 ? "bg-kunyit text-ink" : "bg-ink text-paper")}>
           {rank !== undefined ? `#${rank + 1} · ` : ""}{rec.label}
