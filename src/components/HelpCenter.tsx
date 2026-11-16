@@ -35,7 +35,6 @@ export function HelpCenter() {
   return (
     <div className="mx-auto max-w-6xl space-y-10 px-4 py-8">
       <section className="relative overflow-hidden rounded-3xl bg-ink p-6 text-paper shadow-lift md:p-8">
-        <div className="absolute -right-10 -top-16 h-56 w-56 rounded-full bg-kunyit/20 blur-3xl" aria-hidden />
         <div className="relative">
           <h2 className="font-display text-3xl font-bold tracking-tight">Got a billing problem?</h2>
           <p className="mt-2 max-w-2xl text-lg text-paper/80">Tell us what happened. We&apos;ll draft your message (English or Bahasa Malaysia), show you who to contact, and help you track it until it&apos;s fixed.</p>

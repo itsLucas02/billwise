@@ -79,7 +79,6 @@ export function AnalysisView({ analysis, id, title, createdAt }: { analysis: Ana
     <div className="animate-rise space-y-6" aria-live="polite">
       {/* Hero summary */}
       <section className="relative overflow-hidden rounded-3xl bg-ink p-6 text-paper shadow-lift md:p-8">
-        <div className="absolute -right-16 -top-20 h-64 w-64 rounded-full bg-pandan/25 blur-3xl" aria-hidden />
         <div className="relative flex flex-col gap-6 md:flex-row md:items-center">
           <div className="min-w-0 flex-1">
             <div className="flex flex-wrap items-center gap-2">
@@ -243,7 +242,7 @@ export function AnalysisView({ analysis, id, title, createdAt }: { analysis: Ana
                   <span className={cn("font-mono font-bold tabular-nums", it.amount < 0 && "text-pandan-dark")}>{rm(it.amount)}</span>
                   <ChevronDown className="rotate-on-open h-5 w-5 shrink-0 text-muted transition" aria-hidden />
                 </summary>
-                <div className="mb-3 ml-8 rounded-2xl bg-cream/60 px-4 py-3 leading-relaxed">
+                <div className="mb-4 ml-7 mt-2 border-l-2 border-line py-1 pl-4 pr-2 leading-relaxed text-ink-soft">
                   <p>{it.explanation}</p>
                   {it.note && <p className="mt-2 font-semibold text-pandan-dark">→ {it.note}</p>}
                 </div>

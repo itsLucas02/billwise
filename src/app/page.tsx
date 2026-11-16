@@ -117,7 +117,6 @@ export default function HomePage() {
     <>
       <section className="relative overflow-hidden border-b border-line">
         <div className="dotgrid absolute inset-0 opacity-60" aria-hidden />
-        <div className="absolute -left-32 top-10 h-80 w-80 rounded-full bg-pandan/10 blur-3xl" aria-hidden />
         <div className="relative mx-auto grid max-w-6xl items-center gap-14 px-4 pb-20 pt-10 md:pt-16 lg:grid-cols-[1.1fr_0.9fr]">
           <div className="animate-rise">
             <p className="inline-flex items-center gap-2 rounded-full border border-line bg-white px-3 py-1 text-sm font-semibold text-ink-soft">

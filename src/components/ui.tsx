@@ -84,7 +84,6 @@ export function PageHeader({
   return (
     <section className="relative overflow-hidden border-b border-line bg-cream/70">
       <div className="dotgrid absolute inset-0 opacity-70" aria-hidden />
-      <div className="absolute -right-24 -top-24 h-72 w-72 rounded-full bg-kunyit/25 blur-3xl" aria-hidden />
       <div className="relative mx-auto max-w-6xl px-4 py-9 md:py-14">
         <p className="text-sm font-bold uppercase tracking-[0.16em] text-pandan-dark">{eyebrow}</p>
         <h1 className="mt-3 max-w-3xl font-display text-[clamp(2.1rem,5.4vw,3.6rem)] font-bold leading-[1.02] tracking-tight text-ink">
