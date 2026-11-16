@@ -9,6 +9,7 @@ import { api } from "@/lib/client";
 import { PLANS, PLANS_REVIEWED, contractLabel, dataLabel, getPlan, headline, type Plan, type PlanKind } from "@/lib/plans";
 import { PROVIDERS, PROVIDER_IDS, type ProviderId } from "@/lib/providers";
 import type { Activity, RecommendResult, Recommendation } from "@/lib/recommend";
+import { summariseRerank } from "@/lib/recommend";
 import { rmShort, speedLabel, withSST } from "@/lib/format";
 import { PlanAssistant } from "./PlanAssistant";
 import { Badge, Card, EmptyState, ProviderBadge, btn, btnSm, cn } from "./ui";
@@ -170,6 +171,7 @@ export function PlanFinder({ initial }: { initial: FinderInitial }) {
   const [bSort, setBSort] = useState<"price" | "speed" | "value">("price");
 
   const resultsRef = useRef<HTMLDivElement>(null);
+  const ranAt = useRef<RecommendResult | null>(null); // latest ranking, to summarise what an assistant update changed
   const autoRan = useRef(false);
 
   const run = useCallback(async (override?: Record<string, unknown>) => {
@@ -184,8 +186,10 @@ export function PlanFinder({ initial }: { initial: FinderInitial }) {
           : { kind, budget: mBudget, usage, lines, hotspot, roaming, goodSignal });
       const r = await api<RecommendResult>("/api/plans/recommend", { method: "POST", json: body });
       setResult(r);
+      ranAt.current = r;
       setRankedFrom((r) => ({ version: (r?.version ?? 0) + 1, prefs: body }));
       setTimeout(() => resultsRef.current?.scrollIntoView({ behavior: "smooth", block: "start" }), 50);
+      return r;
     } catch (e) {
       setError(e instanceof Error ? e.message : "Could not load recommendations.");
     } finally {
@@ -222,7 +226,8 @@ export function PlanFinder({ initial }: { initial: FinderInitial }) {
     setCompare((c) => (c.includes(id) ? c.filter((x) => x !== id) : c.length >= 3 ? [...c.slice(1), id] : [...c, id]));
   }
   // The assistant proposes answers (already validated by the server); applying them updates the form and re-runs the rules-based ranking.
-  async function applyProposal(p: Record<string, unknown>) {
+  async function applyProposal(p: Record<string, unknown>): Promise<string> {
+    const before = ranAt.current;
     const n = (v: unknown, lo: number, hi: number) => Math.min(hi, Math.max(lo, Number(v)));
     if (p.kind === "fibre") {
       const next = { ...p, budget: n(p.budget, 50, 400) };
@@ -231,7 +236,8 @@ export function PlanFinder({ initial }: { initial: FinderInitial }) {
       setActivities(p.activities as Activity[]);
       setHomeSize(p.homeSize as "small" | "medium" | "large");
       setFlexible(Boolean(p.flexible));
-      await run(next);
+      const after = await run(next);
+      return before && after ? summariseRerank(before, after, next.budget) : "Matches updated.";
     } else if (p.kind === "mobile") {
       const next = { ...p, budget: n(p.budget, 30, 300) };
       setMBudget(next.budget);
@@ -239,8 +245,10 @@ export function PlanFinder({ initial }: { initial: FinderInitial }) {
       setLines(Number(p.lines));
       setHotspot(Boolean(p.hotspot));
       setRoaming(p.roaming as "never" | "sometimes" | "often");
-      await run(next);
+      const after = await run(next);
+      return before && after ? summariseRerank(before, after, next.budget) : "Matches updated.";
     }
+    return "Matches updated.";
   }
 
   async function toggleSave(id: string) {

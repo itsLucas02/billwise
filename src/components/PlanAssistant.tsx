@@ -10,10 +10,10 @@ import { Card, btn, btnSm, cn } from "./ui";
 const SUGGESTIONS = ["Why is the top pick ranked first?", "Is a cheaper plan good enough for us?", "Kenapa pelan pertama paling sesuai?"];
 
 type Proposal = { prefs: Record<string, unknown>; changes: string[] };
-type Turn = ChatTurn & { proposal?: Proposal | null; applied?: boolean };
+type Turn = ChatTurn & { proposal?: Proposal | null; applied?: boolean; outcome?: string };
 
 /** Q&A about the current ranking (ADR 0002). It can propose new answers; the customer applies them and the rules re-rank. */
-export function PlanAssistant({ prefs, onApply }: { prefs: Record<string, unknown>; onApply: (prefs: Record<string, unknown>) => Promise<void> }) {
+export function PlanAssistant({ prefs, onApply }: { prefs: Record<string, unknown>; onApply: (prefs: Record<string, unknown>) => Promise<string> }) {
   const [turns, setTurns] = useState<Turn[]>([]);
   const [applying, setApplying] = useState(false);
   const [question, setQuestion] = useState("");
@@ -49,9 +49,9 @@ export function PlanAssistant({ prefs, onApply }: { prefs: Record<string, unknow
     setApplying(true);
     setError("");
     try {
-      await onApply(p.prefs);
-      setTurns((ts) => ts.map((t, j) => (j === i ? { ...t, applied: true } : t)));
-      setAnnounce(`Matches updated: ${p.changes.join("; ")}`);
+      const outcome = await onApply(p.prefs);
+      setTurns((ts) => ts.map((t, j) => (j === i ? { ...t, applied: true, outcome } : t)));
+      setAnnounce(`Matches updated. ${outcome}`);
     } catch {
       setError("Couldn't update your matches. Try again.");
     } finally {
@@ -84,6 +84,7 @@ export function PlanAssistant({ prefs, onApply }: { prefs: Record<string, unknow
                   <button type="button" onClick={() => apply(i)} disabled={busy || applying || t.applied} className={cn(btn.accent, btnSm, "mt-3 disabled:opacity-60")}>
                     {t.applied ? <><Check className="h-4 w-4" aria-hidden /> Matches updated</> : applying ? <><LoaderCircle className="h-4 w-4 animate-spin" aria-hidden /> Updating…</> : <><RefreshCw className="h-4 w-4" aria-hidden /> Update my matches</>}
                   </button>
+                  {t.outcome && <p className="mt-3 border-t border-line pt-3 text-sm leading-relaxed">{t.outcome}</p>}
                 </div>
               )}
             </li>

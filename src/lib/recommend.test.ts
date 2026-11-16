@@ -1,6 +1,6 @@
 import { test } from "node:test";
 import assert from "node:assert/strict";
-import { describePrefs, parsePrefs, proposeChange, recommend } from "./recommend.ts";
+import { describePrefs, parsePrefs, proposeChange, recommend, summariseRerank } from "./recommend.ts";
 
 test("parsePrefs keeps valid fibre answers", () => {
   const p = parsePrefs({ kind: "fibre", budget: 150, people: 3, activities: ["wfh", "streaming"], homeSize: "large", flexible: true, postpaidWith: "maxis", available: ["allo"] });
@@ -65,4 +65,20 @@ test("proposeChange ignores no-ops, junk and kind switches", () => {
   assert.equal(proposeChange(current, "budget=200"), null);
   assert.equal(proposeChange(current, { kind: "mobile", budget: 100 }), null);
   assert.equal(proposeChange(current, { budget: 99999 })?.prefs.budget, 800);
+});
+
+test("summariseRerank explains when the budget keeps the same top matches (owner report: RM90, 2 → 6 people)", () => {
+  const before = recommend(parsePrefs({ kind: "fibre", budget: 90, people: 2, activities: ["gaming", "streaming"] })!);
+  const after = recommend(parsePrefs({ kind: "fibre", budget: 90, people: 6, activities: ["gaming", "streaming"] })!);
+  const s = summariseRerank(before, after, 90);
+  assert.match(s, /stay the same/);
+  assert.match(s, /only 4 plans fit your RM90 budget/);
+  assert.match(s, /500Mbps/);
+  assert.match(s, /cheapest plan that meets that is .+ at RM\d+/);
+});
+
+test("summariseRerank names a new top pick", () => {
+  const before = recommend(parsePrefs({ kind: "fibre", budget: 90, people: 2, activities: ["streaming"] })!);
+  const after = recommend(parsePrefs({ kind: "fibre", budget: 200, people: 6, activities: ["gaming", "streaming"] })!);
+  assert.match(summariseRerank(before, after, 200), /^New top pick: .+ at RM\d+/);
 });

@@ -291,6 +291,28 @@ export function parsePrefs(body: Record<string, unknown>): Prefs | null {
   };
 }
 
+const FALLS_SHORT = /^Slower than|^Only \d+GB/;
+const planName = (id: string) => PLANS.find((x) => x.id === id)?.name ?? id;
+
+/** Plain-words summary of what an "Update my matches" re-rank changed, so an unchanged list never looks like a failure. */
+export function summariseRerank(before: RecommendResult, after: RecommendResult, budget: number): string {
+  const top = (r: RecommendResult) => r.results.slice(0, 3).map((x) => x.planId).join();
+  const first = after.results[0];
+  if (!first) return "No plans match these answers.";
+  const parts: string[] = [];
+  if (first.planId !== before.results[0]?.planId) parts.push(`New top pick: ${planName(first.planId)} at ${rmShort(first.monthly)}/month.`);
+  else if (top(before) === top(after)) {
+    const fit = after.results.filter((x) => x.monthly <= budget).length;
+    parts.push(`Your top matches stay the same: only ${fit} plan${fit === 1 ? "" : "s"} fit your ${rmShort(budget)} budget.`);
+  } else parts.push(`Your top pick is still ${planName(first.planId)}; the plans below it changed.`);
+  parts.push(after.needSummary);
+  if (first.cautions.some((c) => FALLS_SHORT.test(c))) {
+    const meets = after.results.filter((x) => !x.cautions.some((c) => FALLS_SHORT.test(c))).sort((a, b) => a.monthly - b.monthly)[0];
+    if (meets) parts.push(`The cheapest plan that meets that is ${planName(meets.planId)} at ${rmShort(meets.monthly)}/month${meets.monthly > budget ? `, ${rmShort(round2(meets.monthly - budget))} over your budget` : ""}.`);
+  }
+  return parts.join(" ");
+}
+
 /** Merge an assistant-proposed change into the current answers (same plan kind only); null when nothing valid changes. */
 export function proposeChange(current: Prefs, patch: unknown): { prefs: Prefs; changes: string[] } | null {
   if (!patch || typeof patch !== "object" || Array.isArray(patch)) return null;
