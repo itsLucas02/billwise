@@ -336,7 +336,7 @@ export function DecoderClient({ initialSample }: { initialSample?: string }) {
       </div>
 
       <div ref={resultRef} className="mx-auto max-w-6xl scroll-mt-20 px-4">
-        {result && <AnalysisView analysis={result.analysis} id={result.id} title={result.title} createdAt={result.createdAt} />}
+        {result && <AnalysisView key={result.id} analysis={result.analysis} id={result.id} title={result.title} createdAt={result.createdAt} />}
       </div>
     </>
   );

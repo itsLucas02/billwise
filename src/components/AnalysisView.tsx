@@ -91,7 +91,7 @@ export function AnalysisView({ analysis, id, title, createdAt }: { analysis: Ana
             <div className="flex flex-wrap items-center gap-2">
               {provider ? <ProviderBadge id={provider} /> : <Badge>Provider not detected</Badge>}
               {matched && <span className="rounded-full bg-white/10 px-3 py-1 text-sm font-semibold">{matched.name}</span>}
-              {createdAt && <span className="text-sm text-paper/60">Decoded {fmtDate(createdAt)}</span>}
+              {createdAt && <span className="text-sm text-paper/60">Decoded {fmtDate(createdAt)} · checked by rules, not AI</span>}
             </div>
             <h2 className="mt-3 font-display text-3xl font-bold tracking-tight md:text-4xl">{title ?? "Your bill, decoded"}</h2>
             <dl className="mt-3 flex flex-wrap gap-x-6 gap-y-1 text-sm text-paper/75">
