@@ -49,14 +49,14 @@ const TOOLS = [
 const FAQ = [
   { q: "Is BillWise free? Do I need to sign up?", a: "Yes, it's free and there's no sign-up. Your analyses and cases are saved to this browser so you can come back to them." },
   { q: "Will you ask for my telco password or IC number?", a: "Never. Just paste the charges from your bill. You can remove your name and address before pasting — we only need the line items." },
-  { q: "Are the plan prices up to date?", a: `Every provider and plan here is fictional and the prices are illustrative, last reviewed ${PLANS_REVIEWED}. Treat them as a working demo of how BillWise compares plans, not as an offer.` },
+  { q: "Are the plan prices up to date?", a: `Prices come from each provider's own published plan pages and were last checked ${PLANS_REVIEWED}. Telcos change prices and promotions often, so confirm on their site before signing up — treat BillWise as a starting point, not an offer.` },
   { q: "Can you tell me if fibre is available at my house?", a: "We won't guess. We point you to each provider's official coverage checker and help you record and compare what they tell you." },
 ];
 
 function HeroReceipt() {
   const rows = [
-    { label: "Unifly Home 300Mbps", amount: "139.00", note: "Promised RM129 — you're overpaying", tone: "bg-kunyit text-ink" },
-    { label: "Unifly TV Add-on Pack", amount: "49.00" },
+    { label: "Unifi Home 300Mbps", amount: "139.00", note: "Promised RM129 — you're overpaying", tone: "bg-kunyit text-ink" },
+    { label: "Unifi TV Add-on Pack", amount: "49.00" },
     { label: "Late payment charge", amount: "10.00", note: "Ask for a one-time waiver", tone: "bg-sambal text-white" },
     { label: "Service tax 6%", amount: "12.48", note: "Correct — telco SST is 6%", tone: "bg-pandan text-white" },
   ];
@@ -68,7 +68,7 @@ function HeroReceipt() {
           <div className="pointer-events-none absolute inset-x-0 top-24 h-10 animate-scan bg-gradient-to-b from-transparent via-kunyit/30 to-transparent" aria-hidden />
           <div className="flex items-center justify-between">
             <div>
-              <p className="font-display text-lg font-bold">unifly · Oct 2026</p>
+              <p className="font-display text-lg font-bold">unifi · Oct 2026</p>
               <p className="text-sm text-muted">Account ••••6789</p>
             </div>
             <SimTag label="Example" />
@@ -125,14 +125,14 @@ export default function HomePage() {
               Understand your <span className="mark">telco bill</span>. Pay only for what you need.
             </h1>
             <p className="mt-5 max-w-xl text-lg leading-relaxed text-muted md:text-xl">
-              BillWise explains confusing charges in plain language, spots overcharges, compares plans from six demo providers, and
+              BillWise explains confusing charges in plain language, spots overcharges, compares plans from six Malaysian telcos, and
               walks you through fixing billing problems — step by step.
             </p>
             <div className="mt-8 flex flex-col gap-3 sm:flex-row">
               <Link href="/decoder" className={btn.primary}>
                 <ScanText className="h-5 w-5" /> Decode my bill
               </Link>
-              <Link href="/decoder?sample=unifly-promo" className={btn.secondary}>
+              <Link href="/decoder?sample=unifi-promo" className={btn.secondary}>
                 Try a sample bill <ArrowRight className="h-5 w-5" />
               </Link>
             </div>
@@ -208,9 +208,9 @@ export default function HomePage() {
           </div>
           <div className="grid gap-4 sm:grid-cols-3 lg:grid-cols-1">
             {[
-              { t: "Illustrative plans, with sources", d: `${PLANS.length} example plans from Unifly, Maxon, TelcomDigi, TIDE, Helo Fibre and V Mobile — each linked to an illustrative source (reviewed ${PLANS_REVIEWED}).` },
+              { t: "Real plans, with sources", d: `${PLANS.length} plans from Unifi, Maxis, CelcomDigi, TIME, Allo and U Mobile — each linked to the provider's own plan page (checked ${PLANS_REVIEWED}).` },
               { t: "No invented coverage", d: "We never claim a service is available at your address. Only the provider checkers — and what you record — count." },
-              { t: "Fiction is labelled", d: "Provider names, plans, prices and contact details are fictional. Sample bills carry a clear “Simulated” tag, so you always know what's real." },
+              { t: "Sample bills are labelled", d: "Provider names, plans and contact details are real. Sample bills use invented account numbers and carry a clear “Specimen” tag, so you always know what's what." },
             ].map((x) => (
               <div key={x.t} className="rounded-2xl border border-line bg-white p-5">
                 <p className="flex items-center gap-2 font-display text-lg font-bold"><BadgeCheck className="h-5 w-5 text-pandan" /> {x.t}</p>

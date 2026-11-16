@@ -40,11 +40,12 @@ function ScoreRing({ score }: { score: number }) {
 export function AnalysisView({ analysis, id, title, createdAt }: { analysis: Analysis; id?: string; title?: string; createdAt?: string }) {
   const a = analysis;
   const m = a.meta;
-  const contact = m.provider ? primaryContact(m.provider) : undefined;
+  const provider = m.provider && m.provider in PROVIDERS ? m.provider : null;
+  const contact = provider ? primaryContact(provider) : undefined;
 
   const disputeHref = (f?: Finding) => {
     const q = new URLSearchParams();
-    if (m.provider) q.set("provider", m.provider);
+    if (provider) q.set("provider", provider);
     if (f?.issueType) q.set("issue", f.issueType);
     if (f?.amount) q.set("amount", String(f.amount));
     if (f) {
@@ -79,7 +80,7 @@ export function AnalysisView({ analysis, id, title, createdAt }: { analysis: Ana
         <div className="relative flex flex-col gap-6 md:flex-row md:items-center">
           <div className="min-w-0 flex-1">
             <div className="flex flex-wrap items-center gap-2">
-              {m.provider ? <ProviderBadge id={m.provider} /> : <Badge>Provider not detected</Badge>}
+              {provider ? <ProviderBadge id={provider} /> : <Badge>Provider not detected</Badge>}
               {matched && <span className="rounded-full bg-white/10 px-3 py-1 text-sm font-semibold">{matched.name}</span>}
               {createdAt && <span className="text-sm text-paper/60">Decoded {fmtDate(createdAt)}</span>}
             </div>
@@ -278,9 +279,9 @@ export function AnalysisView({ analysis, id, title, createdAt }: { analysis: Ana
             <Printer className="h-5 w-5" /> Print / save PDF
           </button>
         </div>
-        {m.provider && contact && (
+        {provider && contact && (
           <p className="mt-4 text-sm text-ink-soft">
-            {PROVIDERS[m.provider].name} customer service: <a className="font-semibold underline" href={contact.href}>{contact.value}</a>
+            {PROVIDERS[provider].name} customer service: <a className="font-semibold underline" href={contact.href}>{contact.value}</a>
             {contact.note ? ` (${contact.note.toLowerCase()})` : ""} · <Link className="font-semibold underline" href="/providers">all contacts</Link>
           </p>
         )}

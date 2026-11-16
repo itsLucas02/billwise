@@ -160,7 +160,7 @@ const RULES: [Category, RegExp][] = [
   ["one_time", /installation|activation|registration|processing|replacement|admin(istration)? (fee|charge)|paper bill|printed bill|bill statement|itemi[sz]ed|relocation|deposit|advance payment|one.?time|courier|delivery|service visit|technician/i],
   ["usage", /excess|usage|overage|chargeable|local call|calls? to|\bsms\b|\bmms\b|data pass|extra data|top.?up|pay.?per.?use|per minute|outgoing|non-?local/i],
   ["addon", /add-?on|addon|supplementary|share ?line|family line|extra line|gadgetsim|\btv\b|sooka|netflix|disney|hotstar|\bviu\b|iqiyi|\bhbo\b|spotify|youtube|prime video|astro|mesh|voice (plan|unlimited|line)|home phone|webshield|mobileshield|protect|insurance|priority pass|static ip/i],
-  ["plan", /monthly|plan|package|pakej|subscription|commitment|postpaid|prepaid|fibre|fiber|broadband|internet|mbps|gbps|rate plan|unifly 5g|\b5g\b|\b4g\b/i],
+  ["plan", /monthly|plan|package|pakej|subscription|commitment|postpaid|prepaid|fibre|fiber|broadband|internet|mbps|gbps|rate plan|uni5g|\b5g\b|\b4g\b/i],
 ];
 
 function categorize(label: string): Category {
@@ -287,7 +287,7 @@ export function decodeBill(input: DecodeInput): Analysis {
   const planText = items.filter((i) => i.category === "plan" || i.category === "prorated").map((i) => i.label).join(" ");
   const speed = parseSpeed(planText);
   if (speed || /fibre|fiber|broadband|home/i.test(planText)) meta.service = "fibre";
-  else if (/postpaid|prepaid|\b5g\b|mobile|unifly 5g|v mobile|vmobile/i.test(planText) || /share ?line|supplementary|roaming|\bidd\b/i.test(text)) meta.service = "mobile";
+  else if (/postpaid|prepaid|\b5g\b|mobile|uni5g|u mobile|umobile|ultra postpaid/i.test(planText) || /share ?line|supplementary|roaming|\bidd\b/i.test(text)) meta.service = "mobile";
   if (speed) meta.speedMbps = speed;
 
   let matched: Plan | undefined;

@@ -2,9 +2,9 @@
 
 **Understand your Malaysian telco bill. Pay only for what you actually need.**
 
-BillWise is a bill-decoding and plan-shopping demo for Malaysian telco customers. Paste in a bill from Unifly, Maxon, TelcomDigi, TIDE, Helo Fibre or V Mobile and get a line-by-line breakdown with concrete findings — duplicate charges, an 8% SST line where telco tax should be 6%, a rebate that is about to expire, a device instalment running longer than it should. It also compares 46 plans across the 6 providers, walks you through coverage checks without guessing, and gives you a workspace to escalate a billing dispute through the right channels.
+BillWise is a bill-decoding and plan-shopping demo for Malaysian telco customers. Paste in a bill from Unifi, Maxis, CelcomDigi, TIME, Allo or U Mobile and get a line-by-line breakdown with concrete findings — duplicate charges, an 8% SST line where telco tax should be 6%, a rebate that is about to expire, a device instalment running longer than it should. It also compares 46 plans across the 6 providers, walks you through coverage checks without guessing, and gives you a workspace to escalate a billing dispute through the right channels.
 
-> **All six providers are fictional.** Names, plans, prices, contact details and source links are simulated for demonstration. The only real details in the app are the public CFM and MCMC escalation channels.
+> **The providers are real; the bills are not.** Provider names, plan names, prices, contact details and source links come from each telco's own published pages and were last checked by hand in Nov 2026. The six sample bills use invented account numbers and amounts. BillWise is independent and not affiliated with any provider — always confirm prices on the provider's site before switching.
 
 No sign-up, no AI, no scraping. Everything is a deterministic rule engine over a hand-maintained plan catalogue.
 
@@ -39,13 +39,13 @@ Analyses are saved per browser and reachable again at `/decoder/[id]`, including
 - **Saved** — a shortlist you keep across visits.
 - **Compare** — `/plans/compare?ids=…` puts up to four plans side by side, including 24-month cost with SST, and highlights the best cell per row.
 
-Each plan carries an illustrative `source` URL on the reserved `example.com` domain and a status marking whether it is a simulated provider listing or a simulated partner listing. Nothing is crawled or refreshed at runtime; `PLANS_REVIEWED` marks the last manual review.
+Each plan carries a `source` URL pointing at that provider's own published plan page and a status marking whether it came from the provider's site or a dealer/press listing. Nothing is crawled or refreshed at runtime — `PLANS_REVIEWED` is the last date a human checked the figures.
 
 ### Coverage — `/coverage`
 
 Three honest checks, deliberately without guesswork:
 
-- **Fibre** — enter a postcode plus property type, and BillWise gives you each provider's simulated checker link and lets you record the result per provider. When at least one says available, those providers pre-fill the plan finder.
+- **Fibre** — enter a postcode plus property type, and BillWise gives you each provider's official coverage-checker link and lets you record the result per provider. When at least one says available, those providers pre-fill the plan finder.
 - **Signal** — enter an RSRP reading (with optional SINR) and get a plain-language interpretation.
 - **Speed** — compare your measured Mbps against a plan's advertised speed, with the test method recorded (LAN / Wi-Fi near / Wi-Fi far), because that changes the honest verdict.
 
@@ -84,7 +84,7 @@ src/lib/
 ├── cases.ts       issue catalogue + EN/BM message drafting
 ├── coverage.ts    postcode→state table, RSRP/SINR/speed interpretation
 ├── format.ts      SST, currency, dates
-├── samples.ts     six simulated bills
+├── samples.ts     six specimen bills
 ├── server.ts      idempotent DDL, anonymous identity, input helpers
 └── client.ts      fetch helper that attaches the browser id
 ```
@@ -97,7 +97,7 @@ These are decisions, not gaps:
 
 - **No AI or LLM.** Every explanation, finding, recommendation and message draft comes from rules and templates. That keeps it free, offline-capable, and auditable.
 - **No accounts.** Identity is an anonymous per-browser id (`x-bw-user`, with an httpOnly cookie fallback). There is no sign-up, password, or OAuth.
-- **No live pricing or coverage data.** Plans are illustrative demo data; coverage is whatever you record from the provider checkers.
+- **No live pricing or coverage data.** Plans are hand-checked against the providers' sites on the date in `PLANS_REVIEWED`; coverage is whatever you record from the provider checkers.
 - **No file upload or OCR.** You paste the bill text, or enter rows by hand.
 - **No dark mode, no PWA, no telemetry.**
 
@@ -122,8 +122,8 @@ npm run build
 
 Warm light palette, bilingual headings, 44–48px minimum targets, visible focus rings, `aria-pressed` / `aria-live` / tablist semantics, a persistent text-size control (md / lg / xl, applied before first paint), and `prefers-reduced-motion` respected throughout.
 
-Simulated sample bills are labelled as such everywhere. Analysis output is framed as guidance for a conversation with your provider — not a ruling or legal advice.
+Specimen sample bills are labelled as such everywhere. Analysis output is framed as guidance for a conversation with your provider — not a ruling or legal advice.
 
 ## Data & disclaimers
 
-Provider names, plans, prices and contact details are fictional, and each plan links to an illustrative source on `example.com`. Coverage results are what you recorded, not what BillWise inferred. The CFM and MCMC escalation channels are real public information.
+Provider names, plan names, prices and contact details are real, taken from each telco's own published pages and checked in Nov 2026, and each plan links to that provider's site. Telcos change prices and promotions frequently, so confirm before signing up. Coverage results are what you recorded, not what BillWise inferred. The sample bills are specimens with invented account numbers. BillWise is independent and not affiliated with any provider. The CFM and MCMC escalation channels are real public information.

@@ -32,7 +32,7 @@ export function SavedAnalysis({ id }: { id: string }) {
         <Link href="/decoder" className={cn(btn.ghost, btnSm)}><ArrowLeft className="h-4 w-4" /> Back to Bill Decoder</Link>
         {data && (
           <div className="flex items-center gap-2">
-            {data.source === "sample" && <SimTag label="Simulated sample" />}
+            {data.source === "sample" && <SimTag label="Specimen sample" />}
             <button type="button" onClick={remove} className={cn(btn.danger, btnSm)}><Trash2 className="h-4 w-4" /> Delete</button>
           </div>
         )}

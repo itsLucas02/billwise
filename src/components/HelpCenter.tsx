@@ -137,7 +137,7 @@ export function HelpCenter() {
           })}
         </div>
       </section>
-      <p className="flex items-center gap-2 text-sm text-muted"><HandCoins className="h-4 w-4" /> Provider names and contact details are fictional and shown for demonstration only. The CFM and MCMC details on this page are real.</p>
+      <p className="flex items-center gap-2 text-sm text-muted"><HandCoins className="h-4 w-4" /> Provider names and contact details come from each provider&apos;s official site — confirm time-sensitive details with them. The CFM and MCMC details on this page are real public information.</p>
     </div>
   );
 }

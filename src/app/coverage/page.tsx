@@ -12,7 +12,7 @@ export default async function CoveragePage({ searchParams }: { searchParams: Pro
       <PageHeader
         eyebrow="Coverage Discovery · Semak liputan"
         title={<>What can I <span className="mark">really</span> get at my address?</>}
-        intro="Check every provider the right way, keep track of what their simulated checkers say, and understand your mobile signal and internet speed."
+        intro="Check every provider the right way, keep track of what their coverage checkers say, and understand your mobile signal and internet speed."
       />
       <CoverageClient initialCheck={check} />
     </>

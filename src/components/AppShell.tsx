@@ -126,9 +126,9 @@ export function AppShell({ children }: { children: ReactNode }) {
           <div>
             <p className="font-bold text-ink">About our data</p>
             <ul className="mt-2 space-y-1.5 leading-relaxed">
-              <li>Providers, plans and prices are fictional demo data, reviewed {PLANS_REVIEWED}.</li>
+              <li>Providers, plans and prices are real, checked {PLANS_REVIEWED}.</li>
               <li>Prices exclude 6% service tax unless shown.</li>
-              <li>Sample bills are simulated. Coverage is never guessed.</li>
+              <li>Sample bills are specimens. Coverage is never guessed.</li>
             </ul>
           </div>
           <div>

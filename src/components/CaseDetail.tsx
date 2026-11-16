@@ -167,7 +167,15 @@ export function CaseDetail({ id }: { id: string }) {
     );
   }
   if (!item || !provider) {
-    return <div className="grid place-items-center py-32 text-muted"><LoaderCircle className="h-8 w-8 animate-spin" /></div>;
+    return (
+      <div className="mx-auto max-w-3xl px-4 py-12">
+        <EmptyState
+          title="We couldn't find this case"
+          text="It was saved under an older set of provider names. Delete it and start a new case to see it in the current directory."
+          action={<Link href="/help" className={btn.primary}>Back to Billing Help</Link>}
+        />
+      </div>
+    );
   }
 
   const p = PROVIDERS[provider];

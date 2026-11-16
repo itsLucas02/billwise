@@ -99,7 +99,7 @@ function PlanCard({
           Source <ExternalLink className="h-4 w-4" />
         </a>
       </div>
-      <p className="mt-2 text-xs text-muted">{plan.status === "official" ? "Simulated provider listing" : "Simulated partner listing"} · reviewed {PLANS_REVIEWED}</p>
+      <p className="mt-2 text-xs text-muted">{(plan.status === "official" ? "Provider's own plan page" : "Dealer / press listing pending re-check")} · checked {PLANS_REVIEWED}</p>
     </article>
   );
 }
@@ -309,7 +309,7 @@ export function PlanFinder({ initial }: { initial: FinderInitial }) {
                   </Q>
                   <Q n={6} title="Already have a postpaid line with…" hint="Some providers give big fibre discounts to their mobile customers.">
                     <Chip on={postpaidWith === ""} onClick={() => setPostpaidWith("")}>None of these</Chip>
-                    {(["maxon", "telcomdigi"] as ProviderId[]).map((id) => <Chip key={id} on={postpaidWith === id} onClick={() => setPostpaidWith(id)}>{PROVIDERS[id].name}</Chip>)}
+                    {(["maxis", "celcomdigi"] as ProviderId[]).map((id) => <Chip key={id} on={postpaidWith === id} onClick={() => setPostpaidWith(id)}>{PROVIDERS[id].name}</Chip>)}
                   </Q>
                   <Q n={7} title="Providers confirmed at your address" hint={fromCoverage ? "Pre-filled from your saved coverage check. Leave empty if you haven't checked yet." : "Optional. Only select providers whose official checker said yes."}>
                     {PROVIDER_IDS.map((id) => <Chip key={id} on={available.includes(id)} onClick={() => setAvailable(toggle(available, id))}>{PROVIDERS[id].name}</Chip>)}
@@ -348,7 +348,7 @@ export function PlanFinder({ initial }: { initial: FinderInitial }) {
                     {([["never", "Rarely"], ["sometimes", "1–3 times a year"], ["often", "Often"]] as const).map(([v, l]) => <Chip key={v} on={roaming === v} onClick={() => setRoaming(v)}>{l}</Chip>)}
                   </Q>
                   <Q n={6} title="Which networks have good signal where you live & work?" hint="Optional — skip if you're not sure.">
-                    {(["unifly", "maxon", "telcomdigi", "vmobile"] as ProviderId[]).map((id) => <Chip key={id} on={goodSignal.includes(id)} onClick={() => setGoodSignal(toggle(goodSignal, id))}>{PROVIDERS[id].name}</Chip>)}
+                    {(["unifi", "maxis", "celcomdigi", "umobile"] as ProviderId[]).map((id) => <Chip key={id} on={goodSignal.includes(id)} onClick={() => setGoodSignal(toggle(goodSignal, id))}>{PROVIDERS[id].name}</Chip>)}
                   </Q>
                 </>
               )}
@@ -445,8 +445,9 @@ export function PlanFinder({ initial }: { initial: FinderInitial }) {
       )}
 
       <p className="mt-10 rounded-2xl border border-line bg-white p-4 text-sm leading-relaxed text-muted">
-        <strong className="text-ink">About these prices:</strong> all providers and plans shown are fictional, with illustrative source links, reviewed {PLANS_REVIEWED}. Prices are monthly,
-        before 6% service tax, and include standard rebates where noted. Treat every figure as demo data rather than an offer.
+        <strong className="text-ink">About these prices:</strong> taken from each provider&apos;s own published plan pages and hand-checked {PLANS_REVIEWED}. Prices are monthly,
+        before 6% service tax, and include standard rebates where noted. Providers change prices and promotions often — confirm on the provider&apos;s site before signing up.
+        BillWise is independent and not affiliated with any provider.
         Mobile data shown as “{dataLabel(PLANS.find((p) => p.dataGB === "unlimited") as Plan)}” is subject to the provider&apos;s fair usage policy.
       </p>
 
