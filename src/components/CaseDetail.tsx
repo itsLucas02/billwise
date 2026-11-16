@@ -285,7 +285,7 @@ export function CaseDetail({ id }: { id: string }) {
           <Card>
             <h2 className="font-display text-xl font-bold">Your message, ready to send</h2>
             <p className="text-muted">Edit anything before copying. Use it by email, live chat, or as a script when you call.</p>
-            <div className="mt-4 flex flex-wrap items-center gap-2">
+            <div className="mt-4 space-y-3">
               <div role="tablist" aria-label="Channel" className="flex flex-wrap gap-2">
                 {([["email", "Email / letter", Mail], ["chat", "Live chat / WhatsApp", MessageCircle], ["call", "Phone call script", Phone]] as const).map(([v, l, Icon]) => (
                   <button key={v} role="tab" type="button" aria-selected={channel === v} onClick={() => setChannel(v)} className={cn("chip !min-h-10 text-sm", channel === v && "!border-ink !bg-ink !text-paper")}>
@@ -293,10 +293,13 @@ export function CaseDetail({ id }: { id: string }) {
                   </button>
                 ))}
               </div>
-              <div role="group" aria-label="Language" className="ml-auto flex rounded-full border-2 border-line p-0.5">
+              <div className="flex items-center gap-3">
+                <span id="draft-lang" className="text-sm font-semibold text-muted">Language</span>
+                <div role="group" aria-labelledby="draft-lang" className="flex rounded-full border-2 border-line p-0.5">
                 {([["en", "English"], ["ms", "Bahasa Malaysia"]] as const).map(([v, l]) => (
                   <button key={v} type="button" aria-pressed={lang === v} onClick={() => setLang(v)} className={cn("rounded-full px-3 py-1.5 text-sm font-semibold", lang === v ? "bg-kunyit text-ink" : "text-muted")}>{l}</button>
                 ))}
+                </div>
               </div>
             </div>
             <label className="sr-only" htmlFor="draft">Message draft</label>
