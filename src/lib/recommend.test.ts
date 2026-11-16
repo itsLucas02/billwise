@@ -1,0 +1,40 @@
+import { test } from "node:test";
+import assert from "node:assert/strict";
+import { describePrefs, parsePrefs, recommend } from "./recommend.ts";
+
+test("parsePrefs keeps valid fibre answers", () => {
+  const p = parsePrefs({ kind: "fibre", budget: 150, people: 3, activities: ["wfh", "streaming"], homeSize: "large", flexible: true, postpaidWith: "maxis", available: ["allo"] });
+  assert.deepEqual(p, { kind: "fibre", budget: 150, people: 3, activities: ["wfh", "streaming"], homeSize: "large", flexible: true, postpaidWith: "maxis", available: ["allo"] });
+});
+
+test("parsePrefs clamps numbers and drops unknown options", () => {
+  const p = parsePrefs({ kind: "mobile", budget: "9999", lines: 40, usage: "insane", roaming: "x", goodSignal: ["maxis", "starlink"] });
+  assert.deepEqual(p, { kind: "mobile", budget: 600, usage: "moderate", lines: 6, hotspot: false, roaming: "sometimes", goodSignal: ["maxis"] });
+  const f = parsePrefs({ kind: "fibre", budget: 5, people: 0, activities: ["mining"], postpaidWith: "nope" });
+  assert.equal(f?.budget, 40);
+  assert.equal(f?.kind === "fibre" && f.people, 1);
+  assert.deepEqual(f?.kind === "fibre" && f.activities, []);
+});
+
+test("parsePrefs rejects missing or invalid answers", () => {
+  assert.equal(parsePrefs({}), null);
+  assert.equal(parsePrefs({ kind: "fibre" }), null);
+  assert.equal(parsePrefs({ kind: "satellite", budget: 100 }), null);
+  assert.equal(parsePrefs({ kind: "mobile", budget: "abc" }), null);
+  assert.equal(parsePrefs({ kind: "mobile", budget: "" }), null);
+});
+
+test("describePrefs states the answers and what the customer confirmed themselves", () => {
+  const fibre = describePrefs(parsePrefs({ kind: "fibre", budget: 150, people: 3, activities: ["wfh"], available: ["allo"] })!);
+  assert.ok(fibre.includes("Budget: RM150/month"));
+  assert.ok(fibre.includes("People at home: 3"));
+  assert.ok(fibre.some((l) => /Confirmed available.*Allo/.test(l)));
+  const mobile = describePrefs(parsePrefs({ kind: "mobile", budget: 80, lines: 2 })!);
+  assert.ok(mobile.includes("Lines: 2"));
+  assert.ok(mobile.includes("Signal: not given"));
+});
+
+test("recommend ranks parsed answers deterministically", () => {
+  const prefs = parsePrefs({ kind: "fibre", budget: 150, people: 3, activities: ["wfh"] })!;
+  assert.deepEqual(recommend(prefs).results.map((r) => r.planId), recommend(prefs).results.map((r) => r.planId));
+});

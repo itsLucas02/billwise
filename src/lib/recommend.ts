@@ -1,6 +1,6 @@
-import { PLANS, costForLines, type Plan } from "./plans";
-import { PROVIDERS, isProviderId, type ProviderId } from "./providers";
-import { round2, rmShort, speedLabel, withSST } from "./format";
+import { PLANS, costForLines, type Plan } from "./plans.ts";
+import { PROVIDERS, isProviderId, type ProviderId } from "./providers.ts";
+import { round2, rmShort, speedLabel, withSST } from "./format.ts";
 
 export type Activity = "streaming" | "gaming" | "wfh" | "uploads" | "smarthome";
 
@@ -263,8 +263,9 @@ const providerList = (v: unknown): ProviderId[] => (Array.isArray(v) ? v.filter(
 const pick = <T extends string>(v: unknown, options: readonly T[], fallback: T): T => (options.includes(v as T) ? (v as T) : fallback);
 const ACTIVITIES = Object.keys(ACTIVITY_LABEL) as Activity[];
 
-/** Validate untrusted Plan Finder answers (request body) into Prefs, with safe defaults. */
-export function parsePrefs(body: Record<string, unknown>): Prefs {
+/** Validate untrusted Plan Finder answers (request body) into Prefs; null without a plan kind and numeric budget. */
+export function parsePrefs(body: Record<string, unknown>): Prefs | null {
+  if ((body.kind !== "fibre" && body.kind !== "mobile") || !Number.isFinite(Number(body.budget)) || body.budget === "" || body.budget == null) return null;
   if (body.kind === "mobile") {
     return {
       kind: "mobile",

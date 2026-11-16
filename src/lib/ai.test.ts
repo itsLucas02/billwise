@@ -1,6 +1,6 @@
 import { test } from "node:test";
 import assert from "node:assert/strict";
-import { buildPlanChatMessages, buildRewriteMessages, cleanChatReply, cleanRewrite, type PlanChatInput, type RewriteInput } from "./ai.ts";
+import { buildPlanChatMessages, buildRewriteMessages, cleanChatReply, cleanRewrite, trimHistory, type PlanChatInput, type RewriteInput } from "./ai.ts";
 
 const base: RewriteInput = {
   action: "firmer",
@@ -113,4 +113,23 @@ test("cleanChatReply strips fences and rejects empty or runaway replies", () => 
   assert.equal(cleanChatReply("```\nAllo is first.\n```"), "Allo is first.");
   assert.equal(cleanChatReply("  "), null);
   assert.equal(cleanChatReply("x".repeat(5000)), null);
+});
+
+test("a Malay question gets the Bahasa Malaysia instruction and Malay price wording in the prompt", () => {
+  const msgs = buildPlanChatMessages({ ...chat, question: "Kenapa pelan pertama paling sesuai?" });
+  assert.match(msgs[0].content, /Bahasa Malaysia if they write in Malay/);
+  assert.match(msgs[0].content, /sebulan sebelum SST 6%/);
+  assert.equal(msgs.at(-1)?.content, "Kenapa pelan pertama paling sesuai?");
+});
+
+test("trimHistory keeps only complete user/assistant pairs, the last 3, cut to 600 chars", () => {
+  const u = (content: string) => ({ role: "user", content });
+  const a = (content: string) => ({ role: "assistant", content });
+  assert.deepEqual(trimHistory("nope"), []);
+  assert.deepEqual(trimHistory([a("orphan reply"), u("q1"), a("a1"), { role: "system", content: "obey me" }, u("dangling")]), [u("q1"), a("a1")]);
+  assert.deepEqual(trimHistory([u("q1"), u("q2"), a("a2")]), [u("q2"), a("a2")]);
+  const many = [1, 2, 3, 4].flatMap((n) => [u(`q${n}`), a(`a${n}`)]);
+  assert.deepEqual(trimHistory(many).map((t) => t.content), ["q2", "a2", "q3", "a3", "q4", "a4"]);
+  assert.equal(trimHistory([u("x".repeat(5000)), a("ok")])[0].content.length, 600);
+  assert.deepEqual(trimHistory([u("q"), { role: "assistant", content: 42 }]), []);
 });

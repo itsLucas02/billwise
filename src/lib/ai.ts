@@ -70,6 +70,21 @@ export function cleanRewrite(raw: string, draft: string): string | null {
 
 export type ChatTurn = { role: "user" | "assistant"; content: string };
 
+/**
+ * Earlier turns come from the browser, so they are untrusted: keep only complete user→assistant
+ * pairs, the last 3 of them, each turn cut to 600 characters.
+ */
+export function trimHistory(raw: unknown): ChatTurn[] {
+  const items = Array.isArray(raw) ? raw : [];
+  const ok = (t: unknown, role: ChatTurn["role"]): t is ChatTurn =>
+    typeof t === "object" && t !== null && (t as ChatTurn).role === role && typeof (t as ChatTurn).content === "string" && (t as ChatTurn).content.trim() !== "";
+  const pairs: ChatTurn[][] = [];
+  for (let i = 0; i < items.length; i++) {
+    if (ok(items[i], "user") && ok(items[i + 1], "assistant")) pairs.push([items[i], items[++i]]);
+  }
+  return pairs.slice(-3).flat().map((t) => ({ role: t.role, content: t.content.trim().slice(0, 600) }));
+}
+
 export interface PlanChatInput {
   question: string;
   history: ChatTurn[];

@@ -1,6 +1,6 @@
 "use client";
 
-import { useState, type FormEvent } from "react";
+import { useRef, useState, type FormEvent } from "react";
 import { LoaderCircle, MessageCircleQuestion, Send } from "lucide-react";
 import { api } from "@/lib/client";
 import type { ChatTurn } from "@/lib/ai";
@@ -16,16 +16,20 @@ export function PlanAssistant({ prefs }: { prefs: Record<string, unknown> }) {
   const [busy, setBusy] = useState(false);
   const [error, setError] = useState("");
   const [remaining, setRemaining] = useState<number | null>(null);
+  const [announce, setAnnounce] = useState("");
+  const inputRef = useRef<HTMLInputElement>(null);
 
   async function ask(q: string) {
     q = q.trim();
     if (q.length < 3 || busy) return;
     setBusy(true);
     setError("");
+    setAnnounce("");
     try {
       const d = await api<{ text: string; remaining: number }>("/api/plans/ask", { method: "POST", json: { question: q, history: turns, prefs } });
       setTurns([...turns, { role: "user", content: q }, { role: "assistant", content: d.text }]);
       setRemaining(d.remaining);
+      setAnnounce(`Assistant: ${d.text}`);
       setQuestion("");
     } catch (e) {
       setError(e instanceof Error ? e.message : "The assistant couldn't answer just now.");
@@ -45,7 +49,7 @@ export function PlanAssistant({ prefs }: { prefs: Record<string, unknown> }) {
       <p className="mt-1 text-muted">Ask why a plan ranks where it does, or what to change for your situation. English or Bahasa Malaysia.</p>
 
       {turns.length > 0 && (
-        <ol className="mt-5 space-y-3" aria-live="polite">
+        <ol className="mt-5 space-y-3" aria-busy={busy}>
           {turns.map((t, i) => (
             <li key={i} className={cn("max-w-[85%] whitespace-pre-wrap rounded-2xl px-4 py-3", t.role === "user" ? "ml-auto bg-ink text-paper" : "bg-paper")}>
               <span className="sr-only">{t.role === "user" ? "You: " : "Assistant: "}</span>
@@ -58,7 +62,7 @@ export function PlanAssistant({ prefs }: { prefs: Record<string, unknown> }) {
       {turns.length === 0 && (
         <div className="mt-4 flex flex-wrap gap-2">
           {SUGGESTIONS.map((s) => (
-            <button key={s} type="button" disabled={busy} onClick={() => ask(s)} className={cn(btn.secondary, btnSm, "disabled:opacity-60")}>{s}</button>
+            <button key={s} type="button" disabled={busy} onClick={() => { inputRef.current?.focus(); ask(s); }} className={cn(btn.secondary, btnSm, "disabled:opacity-60")}>{s}</button>
           ))}
         </div>
       )}
@@ -67,6 +71,8 @@ export function PlanAssistant({ prefs }: { prefs: Record<string, unknown> }) {
         <label className="sr-only" htmlFor="plan-question">Your question</label>
         <input
           id="plan-question"
+          ref={inputRef}
+          aria-busy={busy}
           className="field flex-1"
           value={question}
           maxLength={500}
@@ -78,6 +84,8 @@ export function PlanAssistant({ prefs }: { prefs: Record<string, unknown> }) {
           <span className="sr-only sm:not-sr-only">Ask</span>
         </button>
       </form>
+      {/* Always mounted so the first answer is announced too. */}
+      <p role="status" className="sr-only">{busy ? "Waiting for the assistant…" : announce}</p>
       {error && <p role="alert" className="mt-3 rounded-2xl bg-sambal-soft px-4 py-3 text-[#a1260f]">{error}</p>}
       <p className="mt-3 text-xs text-muted">
         Sends your question and Plan Finder answers to an AI service. It only explains BillWise&apos;s ranking and plan list (prices checked {PLANS_REVIEWED}); it can&apos;t check coverage or change the order. The cards above are the source of truth; confirm prices with the provider before switching.
