@@ -38,3 +38,12 @@ test("recommend ranks parsed answers deterministically", () => {
   const prefs = parsePrefs({ kind: "fibre", budget: 150, people: 3, activities: ["wfh"] })!;
   assert.deepEqual(recommend(prefs).results.map((r) => r.planId), recommend(prefs).results.map((r) => r.planId));
 });
+
+test("plans within the budget rank above plans over it (owner report: RM100 budget, RM139 top pick)", () => {
+  const prefs = parsePrefs({ kind: "fibre", budget: 100, people: 3, activities: ["wfh", "streaming"] })!;
+  const res = recommend(prefs).results;
+  const firstOver = res.findIndex((r) => r.monthly > 100);
+  const lastWithin = res.map((r) => r.monthly <= 100).lastIndexOf(true);
+  assert.ok(res[0].monthly <= 100, `top pick costs RM${res[0].monthly}`);
+  assert.ok(firstOver === -1 || lastWithin < firstOver, "an over-budget plan ranks above an affordable one");
+});

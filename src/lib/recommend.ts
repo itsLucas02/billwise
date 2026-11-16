@@ -151,7 +151,8 @@ function scoreFibre(p: FibrePrefs): RecommendResult {
     return { x, s: clamp(Math.round(s)), cost, reasons, cautions };
   });
 
-  scored.sort((a, b) => b.s - a.s || a.cost - b.cost);
+  // A budget is a limit: every affordable plan ranks above every plan over it; score orders each group.
+  scored.sort((a, b) => Number(b.cost <= p.budget) - Number(a.cost <= p.budget) || b.s - a.s || a.cost - b.cost);
   const results: Recommendation[] = scored.map((r, i) => ({
     planId: r.x.id,
     score: r.s,
@@ -232,7 +233,8 @@ function scoreMobile(p: MobilePrefs): RecommendResult {
     return { x, s: clamp(Math.round(s)), cost, reasons, cautions };
   });
 
-  scored.sort((a, b) => b.s - a.s || a.cost - b.cost);
+  // A budget is a limit: every affordable plan ranks above every plan over it; score orders each group.
+  scored.sort((a, b) => Number(b.cost <= p.budget) - Number(a.cost <= p.budget) || b.s - a.s || a.cost - b.cost);
   const results: Recommendation[] = scored.map((r, i) => ({
     planId: r.x.id,
     score: r.s,
