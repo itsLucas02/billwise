@@ -1,4 +1,4 @@
-import type { ProviderId } from "./providers";
+import type { ProviderId } from "./providers.ts";
 
 export interface SampleBill {
   id: string;

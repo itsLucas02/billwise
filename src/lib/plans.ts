@@ -1,5 +1,5 @@
-import type { ProviderId } from "./providers";
-import { round2, speedLabel } from "./format";
+import type { ProviderId } from "./providers.ts";
+import { round2, speedLabel } from "./format.ts";
 
 export type PlanKind = "fibre" | "mobile";
 

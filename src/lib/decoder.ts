@@ -1,6 +1,6 @@
-import { PLANS, costForLines, type Plan } from "./plans";
-import { PROVIDERS, detectProvider, isProviderId, primaryContact, type ProviderId } from "./providers";
-import { SST_RATE, rm, round2, speedLabel } from "./format";
+import { PLANS, costForLines, type Plan } from "./plans.ts";
+import { PROVIDERS, detectProvider, isProviderId, primaryContact, type ProviderId } from "./providers.ts";
+import { SST_RATE, rm, round2, speedLabel } from "./format.ts";
 
 export type Category =
   | "plan" | "addon" | "device" | "usage" | "roaming" | "idd" | "vas" | "one_time"
@@ -113,7 +113,8 @@ function findAmount(line: string): { value: number; index: number; length: numbe
     }
     const end = m.index + m[0].length;
     const after = line.slice(end, end + 2);
-    const before = m.index > 0 ? line[m.index - 1] : "";
+    const start = m.index + m[0].length - m[0].trimStart().length; // a match can begin with a space: look before that
+    const before = start > 0 ? line[start - 1] : "";
     // skip dates (01.10.2026), percentages, quantities (2.50GB) and times
     if (/^[.\/:]\d/.test(after) || /^\s?%/.test(after) || /^[A-Za-z]/.test(after) || /[.\/\d]/.test(before)) continue;
     const value = parseFloat(`${m[4].replace(/,/g, "")}.${m[5]}`);
@@ -227,6 +228,7 @@ function explain(it: LineItem, service: BillMeta["service"], providerName: strin
     case "one_time":
       return "A one-off charge (e.g. installation, replacement or paper bill fee). It should not repeat next month.";
     case "late_fee":
+      if (/reconnect/i.test(it.label)) return "A fee to restore your line after it was suspended (barred) because an earlier bill was still unpaid after its due date. It is usually charged again each time this happens.";
       return `A fee for paying after the due date. ${providerName === "Your provider" ? "Providers" : providerName} may waive a first-time late fee if you ask.`;
     case "penalty":
       return "A fee for ending a contract early. Check your contract dates — you may not owe it if the contract had ended or the service was faulty.";
@@ -258,6 +260,7 @@ export function decodeBill(input: DecodeInput): Analysis {
   let statedCurrent: number | undefined;
   let statedDue: number | undefined;
   let statedTotal: number | undefined;
+  let paid = 0;
 
   for (const line of lines) {
     const amt = findAmount(line);
@@ -269,6 +272,7 @@ export function decodeBill(input: DecodeInput): Analysis {
       if (acct === "current") statedCurrent = amt.value;
       else if (acct === "due") statedDue = amt.value;
       else if (acct === "previous") meta.previousBalance = amt.value;
+      else if (acct === "payment") paid = round2(paid + Math.abs(amt.value));
       else if (acct === "total" && statedTotal === undefined) statedTotal = amt.value;
       notCounted.push({ label, amount: amt.value });
       continue;
@@ -541,15 +545,39 @@ export function decodeBill(input: DecodeInput): Analysis {
 
   // 11. late fees & penalties
   const late = totalOf("late_fee");
-  if (late > 0) {
+  const reconnectItems = by("late_fee").filter((i) => /reconnect/i.test(i.label));
+  const reconnect = sum(reconnectItems);
+  const plainLate = round2(late - reconnect);
+  if (reconnect > 0) {
     add({
-      severity: "medium",
-      title: `${rm(late)} late payment charge`,
-      detail: `Added because a bill was paid after the due date. If it's a first time, ask ${providerName} for a one-time waiver — many agree. Auto-debit or a reminder before the due date prevents it.`,
-      amount: late,
-      itemIds: by("late_fee").map((i) => i.id),
+      severity: "high",
+      title: `${rm(reconnect)} reconnection fee — your line was cut off for an overdue balance`,
+      detail: `${providerName} suspended (barred) the line because an earlier bill was still unpaid after its due date, then charged this fee to restore it. If your previous balance keeps being about two bills, you are one bill behind and this can repeat every month. Paying the full total amount payable before the due date stops it. You can also ask ${providerName} to waive past reconnection fees as a goodwill gesture.`,
+      amount: reconnect,
+      itemIds: reconnectItems.map((i) => i.id),
       action: "dispute",
       issueType: "late_fee",
+    });
+  }
+  if (plainLate > 0) {
+    add({
+      severity: "medium",
+      title: `${rm(plainLate)} late payment charge`,
+      detail: `Added because a bill was paid after the due date. If it's a first time, ask ${providerName} for a one-time waiver — many agree. Auto-debit or a reminder before the due date prevents it.`,
+      amount: plainLate,
+      itemIds: by("late_fee").filter((i) => !/reconnect/i.test(i.label)).map((i) => i.id),
+      action: "dispute",
+      issueType: "late_fee",
+    });
+  }
+  // 11b. unpaid balance carried in from earlier bills (the account is running behind)
+  const carried = meta.previousBalance !== undefined ? round2(meta.previousBalance - paid) : 0;
+  if (carried > 1) {
+    add({
+      severity: "high",
+      title: `${rm(carried)} unpaid from earlier bills is carried into this one`,
+      detail: `Your previous balance was ${rm(meta.previousBalance!)} and the bill shows ${paid > 0 ? `${rm(paid)} paid since` : "no payment since"}, so ${rm(carried)} is still owed on top of this month's charges. Paying only this month's charges leaves the older amount overdue, which can lead to suspension and reconnection fees. Pay the full total amount payable before the due date to catch up.`,
+      amount: carried,
     });
   }
   const pen = totalOf("penalty");
@@ -722,6 +750,7 @@ export function decodeBill(input: DecodeInput): Analysis {
   const contact = provider ? primaryContact(provider) : undefined;
   if (disputes.length) steps.push(`Contact ${providerName}${contact ? ` (${contact.value})` : ""} about ${disputes.length === 1 ? "the issue flagged above" : `the ${disputes.length} issues flagged above`}. Start a billing case and BillWise will draft the message for you.`);
   if (vas > 0) steps.push("Ask for third-party content billing to be blocked on your line.");
+  if (carried > 1) steps.push(`Pay the full total amount payable (including the ${rm(carried)} carried over) before the due date, so your line isn't suspended again.`);
   if (late > 0) steps.push("Set up auto-debit or a calendar reminder a few days before the due date.");
   if (savings.some((s) => s.kind === "switch" || s.kind === "ask")) steps.push("Compare the cheaper options in Plan Finder — and check coverage at your address before switching.");
   if (rebateEnding) steps.push("Diarise when your promo rebate ends — it's the best moment to renegotiate.");
