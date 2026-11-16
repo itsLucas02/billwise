@@ -1,6 +1,7 @@
 "use client";
 
 import Link from "next/link";
+import { useEffect } from "react";
 import {
   ArrowRight, ChevronDown, CircleAlert, CircleCheck, Info, LifeBuoy, Lightbulb, PiggyBank, Printer, ScanText, Sparkles, TriangleAlert,
   type LucideIcon,
@@ -25,7 +26,7 @@ function ScoreRing({ score }: { score: number }) {
     <div className="relative h-32 w-32 shrink-0" role="img" aria-label={`Bill health score ${score} out of 100`}>
       <svg viewBox="0 0 100 100" className="h-full w-full -rotate-90" aria-hidden>
         <circle cx="50" cy="50" r="42" fill="none" stroke="rgba(251,248,242,0.14)" strokeWidth="10" />
-        <circle cx="50" cy="50" r="42" fill="none" stroke={color} strokeWidth="10" strokeLinecap="round" strokeDasharray={`${(score / 100) * c} ${c}`} />
+        <circle cx="50" cy="50" r="42" fill="none" stroke={color} strokeWidth="10" strokeLinecap="round" strokeDasharray={`${(score / 100) * c} ${c}`} className="animate-ring" style={{ "--ring-len": (score / 100) * c } as React.CSSProperties} />
       </svg>
       <div className="absolute inset-0 grid place-items-center text-center">
         <div>
@@ -40,6 +41,12 @@ function ScoreRing({ score }: { score: number }) {
 export function AnalysisView({ analysis, id, title, createdAt }: { analysis: Analysis; id?: string; title?: string; createdAt?: string }) {
   const a = analysis;
   const m = a.meta;
+  // Printed copies should show every explanation, not collapsed rows.
+  useEffect(() => {
+    const openAll = () => document.querySelectorAll<HTMLDetailsElement>("details[data-print-open]").forEach((d) => (d.open = true));
+    window.addEventListener("beforeprint", openAll);
+    return () => window.removeEventListener("beforeprint", openAll);
+  }, []);
   const provider = m.provider && m.provider in PROVIDERS ? m.provider : null;
   const contact = provider ? primaryContact(provider) : undefined;
 
@@ -104,7 +111,7 @@ export function AnalysisView({ analysis, id, title, createdAt }: { analysis: Ana
         </div>
       </section>
 
-      <div className="grid grid-cols-2 gap-3 md:grid-cols-4">
+      <div className="grid grid-cols-2 gap-3 md:grid-cols-4 [&>*]:animate-rise [&>*:nth-child(2)]:[animation-delay:50ms] [&>*:nth-child(3)]:[animation-delay:100ms] [&>*:nth-child(4)]:[animation-delay:150ms]">
         <Stat label="This bill" value={rm(a.totals.total)} hint={m.statedTotal !== undefined ? `Bill states ${rm(m.statedTotal)}` : "Sum of charges"} />
         <Stat label="Regular monthly" value={rm(a.totals.regular)} hint="Plan, add-ons, device, rebates" />
         <Stat label="Usage & one-offs" value={rm(a.totals.variable)} hint="Shouldn't repeat every month" tone={a.totals.variable > 0 ? "red" : "neutral"} />
@@ -114,7 +121,7 @@ export function AnalysisView({ analysis, id, title, createdAt }: { analysis: Ana
       {/* Breakdown */}
       <Card>
         <h3 className="font-display text-xl font-bold">Where your money goes</h3>
-        <div className="mt-4 flex h-6 w-full overflow-hidden rounded-full bg-cream" role="img" aria-label="Bill breakdown by category">
+        <div className="mt-4 flex h-6 w-full origin-left animate-grow overflow-hidden rounded-full bg-cream" role="img" aria-label="Bill breakdown by category">
           {positives.map((b) => (
             <div key={b.category} style={{ width: `${(b.total / posTotal) * 100}%`, backgroundColor: CATEGORY_INFO[b.category].color }} title={`${CATEGORY_INFO[b.category].label}: ${rm(b.total)}`} />
           ))}
@@ -141,10 +148,10 @@ export function AnalysisView({ analysis, id, title, createdAt }: { analysis: Ana
             {issues.length > 0 && <Badge tone={issues.some((f) => f.severity === "high") ? "red" : "yellow"}>{issues.length} to review</Badge>}
           </h3>
           <ul className="space-y-3">
-            {[...issues, ...goods].map((f) => {
+            {[...issues, ...goods].map((f, i) => {
               const s = SEV[f.severity];
               return (
-                <li key={f.id} className={cn("rounded-2xl border p-4", s.box)}>
+                <li key={f.id} className={cn("animate-rise rounded-2xl border p-4", s.box)} style={{ animationDelay: `${200 + i * 50}ms` }}>
                   <div className="flex gap-3">
                     <span className={cn("grid h-9 w-9 shrink-0 place-items-center rounded-full", s.dot)}>
                       <s.icon className="h-5 w-5" aria-hidden />
@@ -231,7 +238,7 @@ export function AnalysisView({ analysis, id, title, createdAt }: { analysis: Ana
         <ul className="mt-4 divide-y divide-line">
           {a.items.map((it) => (
             <li key={it.id}>
-              <details className="group py-1">
+              <details data-print-open className="group py-1">
                 <summary className="flex items-center gap-3 rounded-xl px-2 py-3 hover:bg-cream/60">
                   <span className="h-3 w-3 shrink-0 rounded-full" style={{ backgroundColor: CATEGORY_INFO[it.category].color }} aria-hidden />
                   <span className="min-w-0 flex-1">

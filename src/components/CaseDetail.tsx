@@ -53,6 +53,7 @@ export function CaseDetail({ id }: { id: string }) {
   const [aiError, setAiError] = useState("");
   const [undo, setUndo] = useState<{ key: string; text: string } | null>(null);
   const [aiDone, setAiDone] = useState("");
+  const [flash, setFlash] = useState(0);
   const [note, setNote] = useState("");
   const [noteKind, setNoteKind] = useState("contact");
   const [ref, setRef] = useState("");
@@ -126,6 +127,7 @@ export function CaseDetail({ id }: { id: string }) {
       // Keep the pre-AI text across several rewrites so Undo returns to the original.
       setUndo((u) => (u?.key === generated ? u : { key: generated, text: draft }));
       setDraft(d.text);
+      setFlash((n) => n + 1); // a new key replays the highlight on each rewrite
       setAiDone(`Draft rewritten. ${d.remaining} AI rewrite${d.remaining === 1 ? "" : "s"} left today.`);
       load();
     } catch (e) {
@@ -298,7 +300,7 @@ export function CaseDetail({ id }: { id: string }) {
               </div>
             </div>
             <label className="sr-only" htmlFor="draft">Message draft</label>
-            <textarea id="draft" aria-busy={aiBusy !== null} className="field mt-4 font-mono text-[0.92rem] leading-relaxed" rows={channel === "chat" ? 7 : 16} value={draft} onChange={(e) => { setDraft(e.target.value); setUndo(null); setAiDone(""); }} />
+            <textarea id="draft" key={flash} aria-busy={aiBusy !== null} className={cn("field mt-4 font-mono text-[0.92rem] leading-relaxed", flash > 0 && "animate-flash")} rows={channel === "chat" ? 7 : 16} value={draft} onChange={(e) => { setDraft(e.target.value); setUndo(null); setAiDone(""); }} />
             <div className="mt-3 rounded-2xl bg-cream/60 p-3">
               <div role="group" aria-label="AI rewrite" className="flex flex-wrap items-center gap-2">
                 <span className="flex items-center gap-1.5 text-sm font-semibold"><Sparkles className="h-4 w-4" /> AI rewrite</span>

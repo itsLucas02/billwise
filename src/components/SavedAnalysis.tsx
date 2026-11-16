@@ -44,7 +44,7 @@ export function SavedAnalysis({ id }: { id: string }) {
       ) : (
         <>
           <AnalysisView analysis={data.analysis} id={data.id} title={data.title} createdAt={data.createdAt} />
-          <details className="mt-6 rounded-2xl border border-line bg-white">
+          <details className="no-print mt-6 rounded-2xl border border-line bg-white">
             <summary className="flex items-center justify-between px-5 py-4 font-semibold">Show the original text <ChevronDown className="rotate-on-open h-5 w-5 transition" /></summary>
             <pre className="overflow-x-auto whitespace-pre-wrap px-5 pb-5 font-mono text-sm text-ink-soft">{data.rawText}</pre>
           </details>

@@ -6,7 +6,7 @@ export function cn(...classes: Array<string | false | null | undefined>): string
 }
 
 const btnBase =
-  "inline-flex items-center justify-center gap-2 rounded-full font-semibold transition duration-150 disabled:pointer-events-none disabled:opacity-50 min-h-12 px-5 py-3 text-center";
+  "inline-flex items-center justify-center gap-2 rounded-full font-semibold transition duration-150 active:scale-[0.97] disabled:pointer-events-none disabled:opacity-50 min-h-12 px-5 py-3 text-center";
 
 export const btn = {
   primary: `${btnBase} bg-ink text-paper shadow-[0_5px_0_-1px_rgba(15,27,45,0.22)] hover:-translate-y-0.5 hover:bg-ink-soft active:translate-y-0`,

@@ -191,7 +191,7 @@ function extractMeta(lines: string[]): Partial<BillMeta> {
     if (!meta.account && (m = line.match(/(?:account|acct|akaun)\s*(?:no\.?|number|num|#)?\s*[:\-]?\s*([A-Z0-9][A-Z0-9\- ]{4,24})/i))) meta.account = maskAccount(m[1]);
     if (!meta.billDate && (m = line.match(/(?:bill|statement|invoice)\s*date\s*[:\-]?\s*(.{6,30})/i))) meta.billDate = tidy(m[1]);
     if (!meta.period && (m = line.match(/(?:billing\s*period|bill\s*period|bill(?:ing)?\s*cycle|^period)\s*[:\-]?\s*(.{6,40})/i))) meta.period = tidy(m[1]);
-    if (!meta.dueDate && (m = line.match(/(?:due\s*date|payment\s*due|pay\s*by|tarikh\s*akhir)\s*[:\-]?\s*(.{6,30})/i))) meta.dueDate = tidy(m[1]);
+    if (!meta.dueDate && (m = line.match(/(?:due\s*date|payment\s*due|pay\s*(?:by|before)|tarikh\s*akhir)\s*[:\-]?\s*(\d{1,2}[\s/.-](?:\d{1,2}|[a-z]{3,9})[\s/.-]\d{2,4})/i))) meta.dueDate = tidy(m[1]);
   }
   return meta;
 }
