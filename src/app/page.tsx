@@ -4,6 +4,7 @@ import {
 } from "lucide-react";
 import { HomeActivity } from "@/components/HomeActivity";
 import { BillSorter } from "@/components/figures/BillSorter";
+import { SeeItWork } from "@/components/figures/SeeItWork";
 import { ProviderBadge, SimTag, btn } from "@/components/ui";
 import { PLANS, PLANS_REVIEWED } from "@/lib/plans";
 import { PROVIDER_IDS } from "@/lib/providers";
@@ -149,6 +150,14 @@ export default function HomePage() {
       </section>
 
       <HomeActivity />
+
+      <section className="mx-auto max-w-4xl px-4 pt-14" aria-labelledby="see-title">
+        <p className="text-sm font-bold uppercase tracking-wider text-pandan-dark">See it work</p>
+        <h2 id="see-title" className="mt-1 font-display text-3xl font-bold tracking-tight sm:text-4xl">From a confusing bill to a message you can send</h2>
+        <div className="mt-6">
+          <SeeItWork />
+        </div>
+      </section>
 
       <section className="mx-auto max-w-6xl px-4 py-14" aria-labelledby="tools-title">
         <h2 id="tools-title" className="font-display text-3xl font-bold tracking-tight md:text-4xl">Four tools. One goal: no more bill surprises.</h2>
