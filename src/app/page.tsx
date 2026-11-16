@@ -3,6 +3,7 @@ import {
   ArrowRight, BadgeCheck, Eye, LifeBuoy, RadioTower, ScanText, ShieldCheck, Sparkles, ChevronDown,
 } from "lucide-react";
 import { HomeActivity } from "@/components/HomeActivity";
+import { BillSorter } from "@/components/figures/BillSorter";
 import { ProviderBadge, SimTag, btn } from "@/components/ui";
 import { PLANS, PLANS_REVIEWED } from "@/lib/plans";
 import { PROVIDER_IDS } from "@/lib/providers";
@@ -179,7 +180,7 @@ export default function HomePage() {
       <section className="border-y border-line bg-ink text-paper">
         <div className="mx-auto grid max-w-6xl gap-10 px-4 py-14 md:grid-cols-3">
           {[
-            { n: "1", t: "Paste or pick a bill", d: "Copy the charges from your e-bill PDF, type them in, or try one of our simulated sample bills." },
+            { n: "1", t: "Upload, paste or pick a bill", d: "Upload your e-bill PDF (read on your device), paste the charges, or try one of our simulated sample bills." },
             { n: "2", t: "See what's normal — and what's not", d: "Every line explained. We check the 6% service tax, duplicates, ended promos, roaming and content charges." },
             { n: "3", t: "Act with confidence", d: "Switch to a better plan, ask for a refund with a ready-made message, or simply relax knowing your bill is right." },
           ].map((s) => (
@@ -189,6 +190,17 @@ export default function HomePage() {
               <p className="mt-2 leading-relaxed text-paper/75">{s.d}</p>
             </div>
           ))}
+        </div>
+      </section>
+
+      <section className="mx-auto max-w-4xl px-4 pt-14" aria-labelledby="inside-title">
+        <p className="text-sm font-bold uppercase tracking-wider text-pandan-dark">Inside the decoder</p>
+        <h2 id="inside-title" className="mt-1 font-display text-3xl font-bold tracking-tight sm:text-4xl">Rules, not guesswork</h2>
+        <p className="mt-3 max-w-2xl text-lg leading-relaxed text-ink-soft">
+          BillWise sorts every line of your bill by fixed, checkable rules, the same way every time. Each charge lands in its bin, and anything worth questioning gets flagged. AI only helps word your enquiry afterwards.
+        </p>
+        <div className="mt-6">
+          <BillSorter />
         </div>
       </section>
 
