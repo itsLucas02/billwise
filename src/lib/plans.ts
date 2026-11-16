@@ -167,3 +167,34 @@ export function headline(p: Plan): string {
 export function contractLabel(p: Plan): string {
   return p.contractMonths > 0 ? `${p.contractMonths}-month contract` : "No contract";
 }
+
+/** The facts that set plans apart, shown on every plan card (browse and ranked) so "unlimited" plans can be told apart. */
+export function planFacts(p: Plan): { label: string; value: string }[] {
+  const money = (n: number) => `RM${Number.isInteger(n) ? n : n.toFixed(2)}`;
+  const extras = p.perks.filter((x) => !/^no contract$/i.test(x) && !/lines? included/i.test(x));
+  const contract = `${contractLabel(p)}${p.contractNote ? ` · ${p.contractNote}` : ""}`;
+  const rows: [string, string | undefined][] =
+    p.kind === "fibre"
+      ? [
+          ["Speed", `${speedLabel(p.down ?? 0)} down${p.up ? ` / ${speedLabel(p.up)} up` : ""}`],
+          ["Router", p.router],
+          ["Contract", contract],
+          ["Bundle", p.bundlePrice !== undefined ? `${money(p.bundlePrice)}${p.bundleNote ? ` ${p.bundleNote.toLowerCase()}` : ""}` : undefined],
+        ]
+      : [
+          ["Data", p.dataNote ?? `${dataLabel(p)} data`],
+          ["Hotspot", p.hotspot ?? "Not listed by the provider"],
+          [
+            "Lines",
+            (p.includedLines ?? 1) > 1
+              ? `${p.includedLines} lines included`
+              : (p.maxExtraLines ?? 0) > 0 && p.extraLineCost !== undefined
+                ? `1 line, up to ${p.maxExtraLines} extra line${p.maxExtraLines === 1 ? "" : "s"} at ${money(p.extraLineCost)} each`
+                : "1 line",
+          ],
+          ["Roaming", p.roaming ?? "No free roaming listed"],
+          ["Contract", contract],
+        ];
+  if (extras.length) rows.push(["Extras", extras.join(", ")]);
+  return rows.filter((r): r is [string, string] => Boolean(r[1])).map(([label, value]) => ({ label, value }));
+}

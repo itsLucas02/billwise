@@ -6,7 +6,7 @@ import {
   Bookmark, BookmarkCheck, Briefcase, Camera, Check, Columns3, ExternalLink, Gamepad2, LoaderCircle, Smartphone, Sparkles, TriangleAlert, Tv, Upload, Wifi, X,
 } from "lucide-react";
 import { api } from "@/lib/client";
-import { PLANS, PLANS_REVIEWED, contractLabel, dataLabel, getPlan, headline, type Plan, type PlanKind } from "@/lib/plans";
+import { PLANS, PLANS_REVIEWED, contractLabel, dataLabel, getPlan, headline, planFacts, type Plan, type PlanKind } from "@/lib/plans";
 import { PROVIDERS, PROVIDER_IDS, type ProviderId } from "@/lib/providers";
 import type { Activity, RecommendResult, Recommendation } from "@/lib/recommend";
 import { summariseRerank } from "@/lib/recommend";
@@ -71,22 +71,23 @@ function PlanCard({
         {isBundle ? ` · ${plan.bundleNote}` : plan.priceNote ? ` · ${plan.priceNote}` : ""}
       </p>
 
-      {rec ? (
-        <ul className="mt-4 space-y-1.5 text-[0.95rem]">
+      <dl className="mt-4 grid grid-cols-[auto_minmax(0,1fr)] gap-x-4 gap-y-2 border-t border-line pt-4 text-[0.95rem]">
+        {planFacts(plan).map((f) => (
+          <div key={f.label} className="contents">
+            <dt className="text-sm font-semibold text-muted">{f.label}</dt>
+            <dd className="text-ink-soft">{f.value}</dd>
+          </div>
+        ))}
+      </dl>
+
+      {rec && (rec.reasons.length > 0 || rec.cautions.length > 0) && (
+        <ul className="mt-4 space-y-1.5 border-t border-line pt-4 text-[0.95rem]">
           {rec.reasons.map((r) => (
             <li key={r} className="flex gap-2"><Check className="mt-0.5 h-4 w-4 shrink-0 text-pandan" aria-hidden /> <span>{r}</span></li>
           ))}
           {rec.cautions.map((c) => (
             <li key={c} className="flex gap-2 text-[#7a5200]"><TriangleAlert className="mt-0.5 h-4 w-4 shrink-0" aria-hidden /> <span>{c}</span></li>
           ))}
-        </ul>
-      ) : (
-        <ul className="mt-4 space-y-1.5 text-[0.95rem] text-ink-soft">
-          <li className="flex gap-2"><Check className="mt-0.5 h-4 w-4 shrink-0 text-pandan" aria-hidden />{contractLabel(plan)}</li>
-          {plan.kind === "fibre" && plan.router && <li className="flex gap-2"><Check className="mt-0.5 h-4 w-4 shrink-0 text-pandan" aria-hidden />{plan.router}</li>}
-          {plan.kind === "mobile" && plan.calls && <li className="flex gap-2"><Check className="mt-0.5 h-4 w-4 shrink-0 text-pandan" aria-hidden />{plan.calls}</li>}
-          {plan.kind === "mobile" && plan.roaming && <li className="flex gap-2"><Check className="mt-0.5 h-4 w-4 shrink-0 text-pandan" aria-hidden />{plan.roaming}</li>}
-          {plan.bundlePrice && <li className="flex gap-2"><Check className="mt-0.5 h-4 w-4 shrink-0 text-pandan" aria-hidden />{rmShort(plan.bundlePrice)} {plan.bundleNote?.toLowerCase()}</li>}
         </ul>
       )}
 
@@ -423,24 +424,36 @@ export function PlanFinder({ initial }: { initial: FinderInitial }) {
 
       {tab === "browse" && (
         <>
-          <Card className="space-y-4">
-            <div className="flex flex-wrap gap-2">
-              <Chip on={bKind === "fibre"} onClick={() => { setBKind("fibre"); setBMin(0); }}><Wifi className="h-4 w-4" /> Home fibre</Chip>
-              <Chip on={bKind === "mobile"} onClick={() => { setBKind("mobile"); setBMin(0); }}><Smartphone className="h-4 w-4" /> Mobile postpaid</Chip>
+          <Card>
+            <div className="grid gap-5 md:grid-cols-[auto_minmax(0,1fr)] md:gap-8">
+              <div role="group" aria-labelledby="b-kind">
+                <p id="b-kind" className="mb-2 text-sm font-semibold text-muted">Plan type</p>
+                <div className="flex flex-wrap gap-2">
+                  <Chip on={bKind === "fibre"} onClick={() => { setBKind("fibre"); setBMin(0); }}><Wifi className="h-4 w-4" /> Home fibre</Chip>
+                  <Chip on={bKind === "mobile"} onClick={() => { setBKind("mobile"); setBMin(0); }}><Smartphone className="h-4 w-4" /> Mobile postpaid</Chip>
+                </div>
+              </div>
+              <div role="group" aria-labelledby="b-providers">
+                <p id="b-providers" className="mb-2 flex items-center justify-between text-sm font-semibold text-muted">
+                  Providers
+                  {bProviders.length > 0 && <button type="button" className="inline-flex items-center gap-1 font-semibold text-ink underline-offset-2 hover:underline" onClick={() => setBProviders([])}><X className="h-3.5 w-3.5" /> Clear</button>}
+                </p>
+                <div className="flex flex-wrap gap-2">
+                  {PROVIDER_IDS.filter((id) => PLANS.some((p) => p.provider === id && p.kind === bKind)).map((id) => (
+                    <Chip key={id} on={bProviders.includes(id)} onClick={() => setBProviders(toggle(bProviders, id))}>{PROVIDERS[id].name}</Chip>
+                  ))}
+                </div>
+              </div>
             </div>
-            <div className="flex flex-wrap gap-2">
-              {PROVIDER_IDS.filter((id) => PLANS.some((p) => p.provider === id && p.kind === bKind)).map((id) => (
-                <Chip key={id} on={bProviders.includes(id)} onClick={() => setBProviders(toggle(bProviders, id))}>{PROVIDERS[id].name}</Chip>
-              ))}
-              {bProviders.length > 0 && <button type="button" className="chip !border-dashed" onClick={() => setBProviders([])}><X className="h-4 w-4" /> Clear</button>}
-            </div>
-            <div className="grid gap-4 md:grid-cols-3">
+            <div className="mt-5 grid gap-5 border-t border-line pt-5 md:grid-cols-3">
               <label className="block">
-                <span className="text-sm font-semibold">Max price: {rmShort(bMax)}/month</span>
-                <input type="range" min={40} max={400} step={10} value={bMax} onChange={(e) => setBMax(Number(e.target.value))} className="mt-2 w-full" />
+                <span className="flex items-baseline justify-between text-sm font-semibold text-muted">Max price <span className="font-display text-base text-ink">{rmShort(bMax)}/month</span></span>
+                <span className="mt-1 flex h-12 items-center">
+                  <input type="range" min={40} max={400} step={10} value={bMax} onChange={(e) => setBMax(Number(e.target.value))} className="w-full" />
+                </span>
               </label>
               <label className="block">
-                <span className="text-sm font-semibold">{bKind === "fibre" ? "Minimum speed" : "Minimum data"}</span>
+                <span className="text-sm font-semibold text-muted">{bKind === "fibre" ? "Minimum speed" : "Minimum data"}</span>
                 <select className="field mt-1" value={bMin} onChange={(e) => setBMin(Number(e.target.value))}>
                   <option value={0}>Any</option>
                   {(bKind === "fibre" ? [100, 300, 500, 1000] : [30, 100, 500]).map((v) => (
@@ -449,7 +462,7 @@ export function PlanFinder({ initial }: { initial: FinderInitial }) {
                 </select>
               </label>
               <label className="block">
-                <span className="text-sm font-semibold">Sort by</span>
+                <span className="text-sm font-semibold text-muted">Sort by</span>
                 <select className="field mt-1" value={bSort} onChange={(e) => setBSort(e.target.value as typeof bSort)}>
                   <option value="price">Lowest price</option>
                   <option value="speed">{bKind === "fibre" ? "Fastest" : "Most data"}</option>
