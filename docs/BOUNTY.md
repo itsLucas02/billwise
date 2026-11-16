@@ -38,7 +38,7 @@ The rest of the app (plan finder, coverage notes, provider directory) supports t
 
 ## Data and uncertainty
 
-- Findings come from deterministic rules and templates. There is no AI inference.
+- Findings and first drafts come from deterministic rules and templates. The only AI is an optional rewrite of the enquiry draft (firmer, shorter, add my notes), grounded on the case facts, with Undo, a 10-per-day cap and a note that the draft is sent to an AI service. See [ADR 0001](adr/0001-ai-rewrite-only-on-enquiry-drafts.md).
 - Findings are ranked by severity ("Act on this", "Worth checking", "Good to know", "Looks fine") and phrased as questions to confirm with the provider where the bill alone can't prove it. Output is guidance for a conversation with the provider, not a ruling or legal advice.
 - Savings are estimates and state their assumptions.
 - Records are anonymous and per browser. There is no sign-up, and no personal data is needed.

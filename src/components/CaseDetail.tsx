@@ -4,8 +4,9 @@ import Link from "next/link";
 import { useRouter } from "next/navigation";
 import { useCallback, useEffect, useMemo, useState } from "react";
 import {
-  ArrowLeft, CalendarDays, Check, CircleCheck, Clock, Copy, ExternalLink, ListChecks, LoaderCircle, Mail, MessageCircle, Phone, Scale, Send, Trash2, TriangleAlert,
+  ArrowLeft, CalendarDays, Check, CircleCheck, Clock, Copy, ExternalLink, ListChecks, LoaderCircle, Mail, MessageCircle, Phone, Scale, Send, Sparkles, Trash2, TriangleAlert, Undo2,
 } from "lucide-react";
+import { REWRITE_ACTIONS, type RewriteAction } from "@/lib/ai";
 import { api } from "@/lib/client";
 import { ISSUES, STATUS_INFO, draftMessage, type CaseStatus, type Channel, type IssueType } from "@/lib/cases";
 import { ESCALATION, PROVIDERS, isProviderId, type ProviderId } from "@/lib/providers";
@@ -36,7 +37,7 @@ interface CaseRow {
 interface EventRow { id: string; kind: string; text: string; createdAt: string }
 
 const FLOW: CaseStatus[] = ["open", "contacted", "awaiting", "resolved"];
-const EVENT_ICON: Record<string, typeof Clock> = { created: Send, status: CircleCheck, note: MessageCircle, contact: Phone, reply: Mail, followup: CalendarDays };
+const EVENT_ICON: Record<string, typeof Clock> = { created: Send, status: CircleCheck, note: MessageCircle, contact: Phone, reply: Mail, followup: CalendarDays, ai: Sparkles };
 
 export function CaseDetail({ id }: { id: string }) {
   const router = useRouter();
@@ -48,6 +49,9 @@ export function CaseDetail({ id }: { id: string }) {
   const [edits, setEdits] = useState<Record<string, string>>({});
   const [copied, setCopied] = useState(false);
   const [copyFailed, setCopyFailed] = useState(false);
+  const [aiBusy, setAiBusy] = useState<RewriteAction | null>(null);
+  const [aiError, setAiError] = useState("");
+  const [undo, setUndo] = useState<{ key: string; text: string } | null>(null);
   const [note, setNote] = useState("");
   const [noteKind, setNoteKind] = useState("contact");
   const [ref, setRef] = useState("");
@@ -111,6 +115,21 @@ export function CaseDetail({ id }: { id: string }) {
   // Drafts are derived from the case; manual edits are remembered per channel/language variant.
   const draft = edits[generated] ?? generated;
   const setDraft = (value: string) => setEdits((m) => ({ ...m, [generated]: value }));
+
+  async function rewrite(action: RewriteAction) {
+    setAiBusy(action);
+    setAiError("");
+    try {
+      const d = await api<{ text: string }>(`/api/cases/${id}/rewrite`, { method: "POST", json: { action, lang, draft } });
+      setUndo({ key: generated, text: draft });
+      setDraft(d.text);
+      load();
+    } catch (e) {
+      setAiError(e instanceof Error ? e.message : "The AI couldn't rewrite this just now. Your draft is unchanged.");
+    } finally {
+      setAiBusy(null);
+    }
+  }
 
   async function update(body: Record<string, unknown>, key: string) {
     setBusy(key);
@@ -275,7 +294,24 @@ export function CaseDetail({ id }: { id: string }) {
               </div>
             </div>
             <label className="sr-only" htmlFor="draft">Message draft</label>
-            <textarea id="draft" className="field mt-4 font-mono text-[0.92rem] leading-relaxed" rows={channel === "chat" ? 7 : 16} value={draft} onChange={(e) => setDraft(e.target.value)} />
+            <textarea id="draft" aria-busy={aiBusy !== null} className="field mt-4 font-mono text-[0.92rem] leading-relaxed" rows={channel === "chat" ? 7 : 16} value={draft} onChange={(e) => setDraft(e.target.value)} />
+            <div className="mt-3 rounded-2xl bg-cream/60 p-3">
+              <div role="group" aria-label="AI rewrite" className="flex flex-wrap items-center gap-2">
+                <span className="flex items-center gap-1.5 text-sm font-semibold"><Sparkles className="h-4 w-4" /> AI rewrite</span>
+                {(Object.keys(REWRITE_ACTIONS) as RewriteAction[]).map((a) => (
+                  <button key={a} type="button" disabled={aiBusy !== null} onClick={() => rewrite(a)} className={cn(btn.secondary, btnSm, "disabled:opacity-60")}>
+                    {aiBusy === a && <LoaderCircle className="h-4 w-4 animate-spin" />} {REWRITE_ACTIONS[a].label}
+                  </button>
+                ))}
+                {undo?.key === generated && (
+                  <button type="button" disabled={aiBusy !== null} onClick={() => { setDraft(undo.text); setUndo(null); }} className={cn(btn.ghost, btnSm, "disabled:opacity-60")}>
+                    <Undo2 className="h-4 w-4" /> Undo
+                  </button>
+                )}
+              </div>
+              <p className="mt-2 text-xs text-muted">Sends this draft and the case details to an AI service. It only rewords what&apos;s here; check the result before you send it.</p>
+              {aiError && <p role="alert" className="mt-2 text-sm font-semibold text-[#a1260f]">{aiError}</p>}
+            </div>
             <div className="mt-3 flex flex-wrap gap-2">
               <button type="button" onClick={copy} className={btn.primary}>{copied ? <Check className="h-5 w-5" /> : <Copy className="h-5 w-5" />} {copied ? "Copied!" : "Copy message"}</button>
               {channel === "email" && emailChannel && (

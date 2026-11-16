@@ -8,7 +8,7 @@ BillWise is a bill-decoding and plan-shopping demo for Malaysian telco customers
 
 > **The providers are real; the bills are not.** Provider names, plan names, prices, contact details and source links come from each telco's own published pages and were last checked by hand in Nov 2026. The six sample bills use invented account numbers and amounts. BillWise is independent and not affiliated with any provider — always confirm prices on the provider's site before switching.
 
-No sign-up, no AI, no scraping. Everything is a deterministic rule engine over a hand-maintained plan catalogue.
+No sign-up, no scraping. Bill analysis, findings and first drafts come from a deterministic rule engine over a hand-maintained plan catalogue. The only AI is an optional rewrite of the enquiry draft (see [ADR 0001](docs/adr/0001-ai-rewrite-only-on-enquiry-drafts.md)).
 
 ---
 
@@ -69,7 +69,7 @@ BillWise never claims to know coverage for your address. It tells you how to fin
 
 ### Dispute workspace — `/help`
 
-Ten issue types (overcharge, promo not honoured, speed below plan, no service, refund, and more), each with a tailored checklist, evidence list, and a choice of drafting an email, a live-chat message, or a phone script — in English or Bahasa Malaysia. Drafts are templates, generated deterministically from your case details, and stay editable.
+Ten issue types (overcharge, promo not honoured, speed below plan, no service, refund, and more), each with a tailored checklist, evidence list, and a choice of drafting an email, a live-chat message, or a phone script — in English or Bahasa Malaysia. Drafts are templates, generated deterministically from your case details, and stay editable. An optional **AI rewrite** (Make it firmer / Make it shorter / Add my notes) rewords the draft using only the case facts, with Undo and a 10-per-day cap per browser.
 
 A case tracks status (`open → contacted → awaiting → resolved`, plus `escalated` and `closed`), a provider reference, follow-up date, recovered amount, and a full event timeline. It also shows the General Consumer Code deadlines (3 / 7 / 30 days from first contact) and the escalation ladder: provider → CFM → MCMC.
 
@@ -111,7 +111,7 @@ The schema bootstraps itself: `ensureSchema()` in `src/lib/server.ts` runs idemp
 
 These are decisions, not gaps:
 
-- **No AI or LLM.** Every explanation, finding, recommendation and message draft comes from rules and templates. That keeps it free, offline-capable, and auditable.
+- **AI only where it can't invent facts.** Every explanation, finding, recommendation and first draft comes from rules and templates, so they stay auditable. The one AI feature rewrites an existing enquiry draft, grounded on the case record, and the rule-based draft always works without it.
 - **No accounts.** Identity is an anonymous per-browser id (`x-bw-user`, with an httpOnly cookie fallback). There is no sign-up, password, or OAuth.
 - **No live pricing or coverage data.** Plans are hand-checked against the providers' sites on the date in `PLANS_REVIEWED`; coverage is whatever you record from the provider checkers.
 - **No file upload or OCR.** You paste the bill text, or enter rows by hand.

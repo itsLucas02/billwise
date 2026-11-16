@@ -39,6 +39,8 @@ All under the `BILLWISE__` prefix. Values are intentionally not recorded here.
 | `BILLWISE__DB_PASSWORD` | Postgres password |
 | `BILLWISE__DB_USER` | Pooler username, `postgres.<ref>` |
 | `BILLWISE__DATABASE_URL_SESSION` | Full session-pooler URL (port 5432) — this is `DATABASE_URL` |
+| `BILLWISE__LITELLM_API_KEY` | LiteLLM key for the AI rewrite — this is `LITELLM_API_KEY` (expires 2027-01-14) |
+| `BILLWISE__LITELLM_BASE_URL` | OpenAI-compatible base URL — this is `LITELLM_BASE_URL` |
 
 List keys only (safe to print):
 
@@ -68,6 +70,8 @@ print(next(s["value"] for s in json.load(sys.stdin) if s["key"]==k))')"
 printf 'DATABASE_URL=%s\n' "$db_url" > .env
 chmod 600 .env
 ```
+
+The AI rewrite also reads `LITELLM_API_KEY`, `LITELLM_BASE_URL` and `AI_MODEL` (default `gpt-5.4-mini`). They are set in Vercel (production and development) and in local `.env`. Without them the app works and the rewrite buttons show a friendly error.
 
 `.env` must keep mode `600`. Never commit it.
 
