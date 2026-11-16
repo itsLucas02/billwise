@@ -344,9 +344,10 @@ export function CaseDetail({ id }: { id: string }) {
             </div>
             <div className="mt-3 flex flex-wrap gap-2">
               <button type="button" onClick={copy} className={btn.primary}>{copied ? <Check className="h-5 w-5" /> : <Copy className="h-5 w-5" />} {copied ? "Copied!" : "Copy message"}</button>
-              {channel === "email" && emailChannel && (
-                <a className={btn.secondary} href={`${emailChannel.href}?subject=${encodeURIComponent(draft.split("\n")[0].replace(/^(Subject|Subjek):\s*/, ""))}&body=${encodeURIComponent(draft.split("\n").slice(2).join("\n"))}`}>
-                  <Mail className="h-5 w-5" /> Open in email app
+              {channel === "email" && (
+                // No known address (e.g. Unifi): still open a pre-filled email; the user adds the recipient.
+                <a className={btn.secondary} href={`${emailChannel?.href ?? "mailto:"}?subject=${encodeURIComponent(draft.split("\n")[0].replace(/^(Subject|Subjek):\s*/, ""))}&body=${encodeURIComponent(draft.split("\n").slice(2).join("\n"))}`}>
+                  <Mail className="h-5 w-5" /> {emailChannel ? "Open in email app" : "Open in email app (add the address)"}
                 </a>
               )}
               {status === "open" && <button type="button" onClick={() => update({ status: "contacted" }, "s")} className={btn.ghost}>I&apos;ve sent it</button>}
