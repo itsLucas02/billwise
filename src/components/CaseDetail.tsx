@@ -47,6 +47,7 @@ export function CaseDetail({ id }: { id: string }) {
   const [lang, setLang] = useState<"en" | "ms">("en");
   const [edits, setEdits] = useState<Record<string, string>>({});
   const [copied, setCopied] = useState(false);
+  const [copyFailed, setCopyFailed] = useState(false);
   const [note, setNote] = useState("");
   const [noteKind, setNoteKind] = useState("contact");
   const [ref, setRef] = useState("");
@@ -136,10 +137,16 @@ export function CaseDetail({ id }: { id: string }) {
   async function copy() {
     try {
       await navigator.clipboard.writeText(draft);
+      setCopyFailed(false);
       setCopied(true);
       setTimeout(() => setCopied(false), 2000);
     } catch {
+      // Clipboard can be blocked (permissions, non-HTTPS, embedded views): select the text so the user can copy by hand.
       setCopied(false);
+      setCopyFailed(true);
+      const el = document.getElementById("draft") as HTMLTextAreaElement | null;
+      el?.focus();
+      el?.select();
     }
   }
 
@@ -278,6 +285,7 @@ export function CaseDetail({ id }: { id: string }) {
               )}
               {status === "open" && <button type="button" onClick={() => update({ status: "contacted" }, "s")} className={btn.ghost}>I&apos;ve sent it</button>}
             </div>
+            {copyFailed && <p role="status" className="mt-2 text-sm font-semibold">Your browser blocked copying. The message is selected — press Ctrl+C (or ⌘C on Mac) to copy it.</p>}
           </Card>
 
           <Card>

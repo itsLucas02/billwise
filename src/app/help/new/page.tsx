@@ -12,10 +12,12 @@ export default async function NewCasePage({ searchParams }: { searchParams: Prom
   const provider = get("provider");
   const issue = get("issue");
   const amount = get("amount");
+  const promised = get("promised");
   const prefill: CasePrefill = {
     provider: isProviderId(provider) ? provider : undefined,
     issue: isIssueType(issue) ? issue : undefined,
     amount: amount && /^\d+(\.\d+)?$/.test(amount) ? amount : undefined,
+    promised: promised && /^\d+(\.\d+)?$/.test(promised) ? promised : undefined,
     label: get("label")?.slice(0, 140),
     month: /^\d{4}-(0[1-9]|1[0-2])$/.test(get("month") ?? "") ? get("month") : undefined,
     analysis: get("analysis"),

@@ -196,7 +196,13 @@ export function draftMessage(input: DraftInput, lang: "en" | "ms", channel: Chan
   const para = (en ? issue.paraEn : issue.paraMs).replace("{promise}", promise);
   const outcome = input.desiredOutcome?.trim() || (en ? issue.outcomeEn : issue.outcomeMs);
   const amountText = input.amount ? rm(input.amount) : "";
-  const charge = input.chargeLabel
+  // Promo cases: the amount is the gap to the promised price, not the whole charge.
+  const promoGap = input.issueType === "promo" && input.promisedPrice && input.chargeLabel && amountText;
+  const charge = promoGap
+    ? en
+      ? `The charge in question is “${input.chargeLabel}”; it is ${amountText} a month more than the price I was promised.`
+      : `Caj berkenaan ialah “${input.chargeLabel}”; ia ${amountText} sebulan lebih tinggi daripada harga yang dijanjikan.`
+    : input.chargeLabel
     ? en
       ? `The charge in question is “${input.chargeLabel}”${amountText ? ` for ${amountText}` : ""}.`
       : `Caj berkenaan ialah “${input.chargeLabel}”${amountText ? ` sebanyak ${amountText}` : ""}.`

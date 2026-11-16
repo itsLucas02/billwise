@@ -72,6 +72,7 @@ export interface BillMeta {
   matchedPlanId?: string;
   statedTotal?: number;
   previousBalance?: number;
+  promisedPrice?: number;
 }
 
 export interface Analysis {
@@ -250,6 +251,7 @@ export function decodeBill(input: DecodeInput): Analysis {
   const provider: ProviderId | null = isProviderId(input.provider) ? input.provider : detectProvider(text);
   const providerName = provider ? PROVIDERS[provider].name : "Your provider";
   const meta: BillMeta = { provider, providerName, service: "unknown", ...extractMeta(lines) };
+  if (input.promisedPrice && input.promisedPrice > 0) meta.promisedPrice = input.promisedPrice;
 
   const items: LineItem[] = [];
   const notCounted: { label: string; amount: number }[] = [];

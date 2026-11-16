@@ -54,6 +54,7 @@ export function AnalysisView({ analysis, id, title, createdAt }: { analysis: Ana
     }
     const d = (m.period ?? m.billDate)?.match(/\b\d{1,2}[/.-](\d{1,2})[/.-](\d{4})\b/);
     if (d) q.set("month", `${d[2]}-${d[1].padStart(2, "0")}`);
+    if (f?.issueType === "promo" && m.promisedPrice) q.set("promised", String(m.promisedPrice));
     if (id) q.set("analysis", id);
     return `/help/new?${q.toString()}`;
   };

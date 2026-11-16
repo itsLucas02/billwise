@@ -14,6 +14,7 @@ export interface CasePrefill {
   amount?: string;
   label?: string;
   month?: string;
+  promised?: string;
   analysis?: string;
 }
 
@@ -39,7 +40,7 @@ export function NewCaseWizard({ prefill }: { prefill: CasePrefill }) {
   const [chargeLabel, setChargeLabel] = useState(prefill.label ?? "");
   const [amount, setAmount] = useState(prefill.amount ?? "");
   const [accountRef, setAccountRef] = useState("");
-  const [promised, setPromised] = useState("");
+  const [promised, setPromised] = useState(prefill.promised ?? "");
   const [description, setDescription] = useState("");
   const [outcome, setOutcome] = useState(prefill.issue ? ISSUES[prefill.issue].outcomeEn : "");
   const [name, setName] = useState("");
