@@ -102,9 +102,9 @@ BillWise has already ranked the plans below with deterministic rules from the cu
 - Use only the facts in the context below: the customer's answers, the ranked plans, their scores, reasons and cautions, and the catalogue details. Do not mention any plan, price, promotion, speed, data amount, perk or provider that is not in the context. If asked about something that is not there, say BillWise doesn't list it and suggest checking the provider's own site.
 - Do not re-rank, reorder or re-score plans, and do not invent your own score. When you say why a plan is ranked where it is, use its listed reasons and cautions.
 - Plans within the customer's budget always rank above plans over it; if a plan over budget appears, it is because fewer plans fit, so say how far over it is.
-- Check the customer's answers before suggesting a change: never tell them to set an answer to a value it already has. Only if they describe needs that really differ from their answers (a different budget, household size or activity), say which Plan Finder answer to change and to press "Show my best matches" again for an updated ranking. You may point out which listed plans already fit the new need, using only the listed facts.
+- Check the customer's answers before proposing a change: never propose a value an answer already has. When the customer describes needs that really differ from their answers (a different budget, household size, activities, usage and so on), you can update the answers for them: write one or two short sentences saying what you would change and why, and call the propose_answers tool with only the answers to change (if you cannot call tools, end the reply with one line <prefs>{...}</prefs> holding the same JSON instead). Home fibre keys: budget (RM number), people (1-12), activities (the full new list from streaming, gaming, wfh, uploads, smarthome), homeSize (small, medium, large), flexible (true if they prefer no contract). Mobile keys: budget (RM number for all lines), usage (light, moderate, heavy, max), lines (1-6), hotspot (true or false), roaming (never, sometimes, often). Do not change coverage or signal answers. BillWise shows the change as an "Update my matches" button and re-ranks with its own rules, so do not predict the new order and do not tell them to edit the form. Do not propose anything when nothing should change.
 - Never say or imply a plan is available at the customer's address. BillWise does not know coverage: point them to the Coverage page and the provider's own coverage checker.
-- Quote prices exactly as listed, as "RMx/month before 6% SST" (in Bahasa Malaysia: "RMx sebulan sebelum SST 6%"), and mention once that prices were checked in the review month given and should be confirmed on the provider's site before switching. Point out promo prices, bundle conditions and contract terms when they matter. A price marked "dealer or press listing" was not seen on the provider's own site; say so if it matters.
+- Quote prices exactly as listed, as "RMx/month before 6% SST" in English replies, or "RMx sebulan sebelum SST 6%" only when replying in Bahasa Malaysia, and mention once that prices were checked in the review month given and should be confirmed on the provider's site before switching. Point out promo prices, bundle conditions and contract terms when they matter. A price marked "dealer or press listing" was not seen on the provider's own site; say so if it matters.
 - Be brief: at most about 150 words, short paragraphs or a few bullet points, no tables, no markdown headings. If one more detail would change the advice, end with one short follow-up question.
 - Reply in the language of the customer's latest message: Bahasa Malaysia if they write in Malay, otherwise English.
 - Only offer follow-ups this data can answer.
@@ -151,6 +151,59 @@ export function buildPlanChatMessages(input: PlanChatInput): { role: "system" | 
     ...input.history,
     { role: "user", content: input.question },
   ];
+}
+
+/** OpenAI-style tool the Plan Finder assistant may call to propose new answers; the server still validates them with proposeChange. */
+export const PROPOSE_ANSWERS_TOOL = {
+  type: "function",
+  function: {
+    name: "propose_answers",
+    description: "Propose changes to the customer's Plan Finder answers when their described needs differ. Include only the answers that change. BillWise shows an 'Update my matches' button and re-ranks with its own rules.",
+    parameters: {
+      type: "object",
+      additionalProperties: false,
+      properties: {
+        budget: { type: "number", description: "Monthly budget in RM before SST (mobile: all lines together)" },
+        people: { type: "integer", minimum: 1, maximum: 12, description: "Home fibre: people at home" },
+        activities: { type: "array", items: { type: "string", enum: ["streaming", "gaming", "wfh", "uploads", "smarthome"] }, description: "Home fibre: the full new list" },
+        homeSize: { type: "string", enum: ["small", "medium", "large"] },
+        flexible: { type: "boolean", description: "Home fibre: true if they prefer no contract" },
+        usage: { type: "string", enum: ["light", "moderate", "heavy", "max"], description: "Mobile data usage" },
+        lines: { type: "integer", minimum: 1, maximum: 6 },
+        hotspot: { type: "boolean" },
+        roaming: { type: "string", enum: ["never", "sometimes", "often"] },
+      },
+    },
+  },
+} as const;
+
+/** The proposed answers from a chat-completions message's propose_answers tool call, or null. */
+export function proposalFromMessage(msg: unknown): Record<string, unknown> | null {
+  const calls = (msg as { tool_calls?: { function?: { name?: string; arguments?: string } }[] } | null)?.tool_calls;
+  const call = Array.isArray(calls) ? calls.find((c) => c?.function?.name === "propose_answers") : undefined;
+  if (!call?.function?.arguments) return null;
+  try {
+    const v: unknown = JSON.parse(call.function.arguments);
+    return v && typeof v === "object" && !Array.isArray(v) ? (v as Record<string, unknown>) : null;
+  } catch {
+    return null;
+  }
+}
+
+const PROPOSAL_RE = /<prefs>([\s\S]*?)<\/prefs>/i;
+
+/** Split the assistant's reply into the visible text and an optional proposed answer change (still untrusted: validate with proposeChange). */
+export function extractProposal(raw: string): { text: string; patch: Record<string, unknown> | null } {
+  const m = raw.match(PROPOSAL_RE);
+  if (!m) return { text: raw.trim(), patch: null };
+  let patch: Record<string, unknown> | null = null;
+  try {
+    const v: unknown = JSON.parse(m[1]);
+    if (v && typeof v === "object" && !Array.isArray(v)) patch = v as Record<string, unknown>;
+  } catch {
+    /* a malformed proposal is dropped; the reply text still stands */
+  }
+  return { text: raw.replace(PROPOSAL_RE, "").replace(/\s+$/, "").trim(), patch };
 }
 
 /** Tidy the assistant's reply; null means "unusable". */

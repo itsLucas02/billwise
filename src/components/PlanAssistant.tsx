@@ -1,7 +1,7 @@
 "use client";
 
 import { useRef, useState, type FormEvent } from "react";
-import { LoaderCircle, MessageCircleQuestion, Send } from "lucide-react";
+import { Check, LoaderCircle, MessageCircleQuestion, RefreshCw, Send } from "lucide-react";
 import { api } from "@/lib/client";
 import type { ChatTurn } from "@/lib/ai";
 import { PLANS_REVIEWED } from "@/lib/plans";
@@ -9,9 +9,13 @@ import { Card, btn, btnSm, cn } from "./ui";
 
 const SUGGESTIONS = ["Why is the top pick ranked first?", "Is a cheaper plan good enough for us?", "Kenapa pelan pertama paling sesuai?"];
 
-/** Optional Q&A about the current ranking (ADR 0002). Remount with a new key when the results change. */
-export function PlanAssistant({ prefs }: { prefs: Record<string, unknown> }) {
-  const [turns, setTurns] = useState<ChatTurn[]>([]);
+type Proposal = { prefs: Record<string, unknown>; changes: string[] };
+type Turn = ChatTurn & { proposal?: Proposal | null; applied?: boolean };
+
+/** Q&A about the current ranking (ADR 0002). It can propose new answers; the customer applies them and the rules re-rank. */
+export function PlanAssistant({ prefs, onApply }: { prefs: Record<string, unknown>; onApply: (prefs: Record<string, unknown>) => Promise<void> }) {
+  const [turns, setTurns] = useState<Turn[]>([]);
+  const [applying, setApplying] = useState(false);
   const [question, setQuestion] = useState("");
   const [busy, setBusy] = useState(false);
   const [error, setError] = useState("");
@@ -26,8 +30,9 @@ export function PlanAssistant({ prefs }: { prefs: Record<string, unknown> }) {
     setError("");
     setAnnounce("");
     try {
-      const d = await api<{ text: string; remaining: number }>("/api/plans/ask", { method: "POST", json: { question: q, history: turns, prefs } });
-      setTurns([...turns, { role: "user", content: q }, { role: "assistant", content: d.text }]);
+      const history = turns.map(({ role, content }) => ({ role, content }));
+      const d = await api<{ text: string; proposal: Proposal | null; remaining: number }>("/api/plans/ask", { method: "POST", json: { question: q, history, prefs } });
+      setTurns([...turns, { role: "user", content: q }, { role: "assistant", content: d.text, proposal: d.proposal }]);
       setRemaining(d.remaining);
       setAnnounce(`Assistant: ${d.text}`);
       setQuestion("");
@@ -35,6 +40,22 @@ export function PlanAssistant({ prefs }: { prefs: Record<string, unknown> }) {
       setError(e instanceof Error ? e.message : "The assistant couldn't answer just now.");
     } finally {
       setBusy(false);
+    }
+  }
+
+  async function apply(i: number) {
+    const p = turns[i].proposal;
+    if (!p || applying) return;
+    setApplying(true);
+    setError("");
+    try {
+      await onApply(p.prefs);
+      setTurns((ts) => ts.map((t, j) => (j === i ? { ...t, applied: true } : t)));
+      setAnnounce(`Matches updated: ${p.changes.join("; ")}`);
+    } catch {
+      setError("Couldn't update your matches. Try again.");
+    } finally {
+      setApplying(false);
     }
   }
 
@@ -54,6 +75,17 @@ export function PlanAssistant({ prefs }: { prefs: Record<string, unknown> }) {
             <li key={i} className={cn("max-w-[85%] whitespace-pre-wrap rounded-2xl px-4 py-3", t.role === "user" ? "ml-auto bg-ink text-paper" : "bg-paper")}>
               <span className="sr-only">{t.role === "user" ? "You: " : "Assistant: "}</span>
               {t.content}
+              {t.proposal && (
+                <div className="mt-3 whitespace-normal rounded-xl border border-line bg-white p-3">
+                  <p className="text-sm font-semibold">Suggested change to your answers</p>
+                  <ul className="mt-1 space-y-0.5 text-sm text-ink-soft">
+                    {t.proposal.changes.map((c) => <li key={c}>{c}</li>)}
+                  </ul>
+                  <button type="button" onClick={() => apply(i)} disabled={busy || applying || t.applied} className={cn(btn.accent, btnSm, "mt-3 disabled:opacity-60")}>
+                    {t.applied ? <><Check className="h-4 w-4" aria-hidden /> Matches updated</> : applying ? <><LoaderCircle className="h-4 w-4 animate-spin" aria-hidden /> Updating…</> : <><RefreshCw className="h-4 w-4" aria-hidden /> Update my matches</>}
+                  </button>
+                </div>
+              )}
             </li>
           ))}
         </ol>
@@ -88,7 +120,7 @@ export function PlanAssistant({ prefs }: { prefs: Record<string, unknown> }) {
       <p role="status" className="sr-only">{busy ? "Waiting for the assistant…" : announce}</p>
       {error && <p role="alert" className="mt-3 rounded-2xl bg-sambal-soft px-4 py-3 text-[#a1260f]">{error}</p>}
       <p className="mt-3 text-xs text-muted">
-        Sends your question and Plan Finder answers to an AI service. It only explains BillWise&apos;s ranking and plan list (prices checked {PLANS_REVIEWED}); it can&apos;t check coverage or change the order. The cards above are the source of truth; confirm prices with the provider before switching.
+        Sends your question and Plan Finder answers to an AI service. It explains BillWise&apos;s ranking and plan list (prices checked {PLANS_REVIEWED}) and can suggest new answers for you to apply; BillWise&apos;s rules still do the ranking, and it can&apos;t check coverage. The cards above are the source of truth; confirm prices with the provider before switching.
         {remaining !== null && ` ${remaining} question${remaining === 1 ? "" : "s"} left today.`}
       </p>
     </Card>

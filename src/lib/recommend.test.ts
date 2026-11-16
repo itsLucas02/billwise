@@ -1,6 +1,6 @@
 import { test } from "node:test";
 import assert from "node:assert/strict";
-import { describePrefs, parsePrefs, recommend } from "./recommend.ts";
+import { describePrefs, parsePrefs, proposeChange, recommend } from "./recommend.ts";
 
 test("parsePrefs keeps valid fibre answers", () => {
   const p = parsePrefs({ kind: "fibre", budget: 150, people: 3, activities: ["wfh", "streaming"], homeSize: "large", flexible: true, postpaidWith: "maxis", available: ["allo"] });
@@ -46,4 +46,23 @@ test("plans within the budget rank above plans over it (owner report: RM100 budg
   const lastWithin = res.map((r) => r.monthly <= 100).lastIndexOf(true);
   assert.ok(res[0].monthly <= 100, `top pick costs RM${res[0].monthly}`);
   assert.ok(firstOver === -1 || lastWithin < firstOver, "an over-budget plan ranks above an affordable one");
+});
+
+test("proposeChange applies an assistant proposal and lists what changed", () => {
+  const current = parsePrefs({ kind: "fibre", budget: 100, people: 3, activities: ["wfh"] })!;
+  const out = proposeChange(current, { budget: 130, activities: ["wfh", "gaming"] });
+  assert.ok(out);
+  assert.equal(out.prefs.budget, 130);
+  assert.deepEqual(out.prefs.kind === "fibre" && out.prefs.activities, ["wfh", "gaming"]);
+  assert.ok(out.changes.some((c) => /Budget: RM100\/month → RM130\/month/.test(c)), out.changes.join(" | "));
+  assert.equal(out.changes.length, 2);
+});
+
+test("proposeChange ignores no-ops, junk and kind switches", () => {
+  const current = parsePrefs({ kind: "fibre", budget: 100, people: 3, activities: ["wfh"] })!;
+  assert.equal(proposeChange(current, { budget: 100 }), null);
+  assert.equal(proposeChange(current, { colour: "blue" }), null);
+  assert.equal(proposeChange(current, "budget=200"), null);
+  assert.equal(proposeChange(current, { kind: "mobile", budget: 100 }), null);
+  assert.equal(proposeChange(current, { budget: 99999 })?.prefs.budget, 800);
 });

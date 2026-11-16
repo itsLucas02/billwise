@@ -1,6 +1,6 @@
 import { test } from "node:test";
 import assert from "node:assert/strict";
-import { buildPlanChatMessages, buildRewriteMessages, cleanChatReply, cleanRewrite, trimHistory, type PlanChatInput, type RewriteInput } from "./ai.ts";
+import { buildPlanChatMessages, buildRewriteMessages, cleanChatReply, cleanRewrite, extractProposal, proposalFromMessage, trimHistory, type PlanChatInput, type RewriteInput } from "./ai.ts";
 
 const base: RewriteInput = {
   action: "firmer",
@@ -132,4 +132,24 @@ test("trimHistory keeps only complete user/assistant pairs, the last 3, cut to 6
   assert.deepEqual(trimHistory(many).map((t) => t.content), ["q2", "a2", "q3", "a3", "q4", "a4"]);
   assert.equal(trimHistory([u("x".repeat(5000)), a("ok")])[0].content.length, 600);
   assert.deepEqual(trimHistory([u("q"), { role: "assistant", content: 42 }]), []);
+});
+
+test("extractProposal pulls the <prefs> JSON out of the reply", () => {
+  const r = extractProposal('Gaming needs more speed, so I would raise your budget.\n<prefs>{"budget":130,"activities":["wfh","gaming"]}</prefs>');
+  assert.equal(r.text, "Gaming needs more speed, so I would raise your budget.");
+  assert.deepEqual(r.patch, { budget: 130, activities: ["wfh", "gaming"] });
+});
+
+test("extractProposal drops a broken tag and leaves plain replies alone", () => {
+  assert.deepEqual(extractProposal("Sure. <prefs>{budget: 130</prefs>"), { text: "Sure.", patch: null });
+  assert.deepEqual(extractProposal("No change needed."), { text: "No change needed.", patch: null });
+  assert.deepEqual(extractProposal("<prefs>[1,2]</prefs> Ok"), { text: "Ok", patch: null });
+});
+
+test("proposalFromMessage reads a propose_answers tool call, and ignores others", () => {
+  const msg = { content: "Raising your budget.", tool_calls: [{ type: "function", function: { name: "propose_answers", arguments: '{"budget":130,"activities":["streaming","gaming"]}' } }] };
+  assert.deepEqual(proposalFromMessage(msg), { budget: 130, activities: ["streaming", "gaming"] });
+  assert.equal(proposalFromMessage({ content: "hi" }), null);
+  assert.equal(proposalFromMessage({ tool_calls: [{ function: { name: "other", arguments: "{}" } }] }), null);
+  assert.equal(proposalFromMessage({ tool_calls: [{ function: { name: "propose_answers", arguments: "not json" } }] }), null);
 });

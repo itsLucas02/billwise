@@ -291,6 +291,17 @@ export function parsePrefs(body: Record<string, unknown>): Prefs | null {
   };
 }
 
+/** Merge an assistant-proposed change into the current answers (same plan kind only); null when nothing valid changes. */
+export function proposeChange(current: Prefs, patch: unknown): { prefs: Prefs; changes: string[] } | null {
+  if (!patch || typeof patch !== "object" || Array.isArray(patch)) return null;
+  if ("kind" in patch && (patch as { kind: unknown }).kind !== current.kind) return null;
+  const next = parsePrefs({ ...current, ...(patch as Record<string, unknown>), kind: current.kind });
+  if (!next) return null;
+  const before = describePrefs(current);
+  const changes = describePrefs(next).flatMap((line, i) => (line === before[i] ? [] : [`${before[i]} → ${line.slice(line.indexOf(": ") + 2)}`]));
+  return changes.length ? { prefs: next, changes } : null;
+}
+
 /** The answers behind a ranking, as readable lines for the Plan Finder assistant. */
 export function describePrefs(p: Prefs): string[] {
   const names = (ids?: ProviderId[]) => (ids ?? []).map((id) => PROVIDERS[id].name).join(", ");

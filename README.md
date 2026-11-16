@@ -8,7 +8,7 @@ BillWise is a bill-decoding and plan-shopping demo for Malaysian telco customers
 
 > **The providers are real; the bills are not.** Provider names, plan names, prices, contact details and source links come from each telco's own published pages and were last checked by hand in Nov 2026. The six sample bills use invented account numbers and amounts. BillWise is independent and not affiliated with any provider — always confirm prices on the provider's site before switching.
 
-No sign-up, no scraping. Bill analysis, findings and first drafts come from a deterministic rule engine over a hand-maintained plan catalogue. AI is optional and only rewords or explains what BillWise already holds: a rewrite of the enquiry draft ([ADR 0001](docs/adr/0001-ai-rewrite-only-on-enquiry-drafts.md)) and a Plan Finder assistant that explains the ranking ([ADR 0002](docs/adr/0002-plan-finder-assistant-explains-ranking-only.md)).
+No sign-up, no scraping. Bill analysis, findings and first drafts come from a deterministic rule engine over a hand-maintained plan catalogue. AI is optional and only rewords or explains what BillWise already holds: a rewrite of the enquiry draft ([ADR 0001](docs/adr/0001-ai-rewrite-only-on-enquiry-drafts.md)) and a Plan Finder assistant that explains the ranking and can propose new answers for you to apply, after which the rules re-rank ([ADR 0002](docs/adr/0002-plan-finder-assistant-explains-ranking-only.md)).
 
 ---
 

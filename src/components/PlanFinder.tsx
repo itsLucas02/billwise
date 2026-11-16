@@ -172,15 +172,16 @@ export function PlanFinder({ initial }: { initial: FinderInitial }) {
   const resultsRef = useRef<HTMLDivElement>(null);
   const autoRan = useRef(false);
 
-  const run = useCallback(async () => {
+  const run = useCallback(async (override?: Record<string, unknown>) => {
     setLoading(true);
     setError("");
     setShowAll(false);
     try {
       const body =
-        kind === "fibre"
+        override ??
+        (kind === "fibre"
           ? { kind, budget: fBudget, people, activities, homeSize, flexible, postpaidWith, available }
-          : { kind, budget: mBudget, usage, lines, hotspot, roaming, goodSignal };
+          : { kind, budget: mBudget, usage, lines, hotspot, roaming, goodSignal });
       const r = await api<RecommendResult>("/api/plans/recommend", { method: "POST", json: body });
       setResult(r);
       setRankedFrom((r) => ({ version: (r?.version ?? 0) + 1, prefs: body }));
@@ -220,6 +221,28 @@ export function PlanFinder({ initial }: { initial: FinderInitial }) {
   function toggleCompare(id: string) {
     setCompare((c) => (c.includes(id) ? c.filter((x) => x !== id) : c.length >= 3 ? [...c.slice(1), id] : [...c, id]));
   }
+  // The assistant proposes answers (already validated by the server); applying them updates the form and re-runs the rules-based ranking.
+  async function applyProposal(p: Record<string, unknown>) {
+    const n = (v: unknown, lo: number, hi: number) => Math.min(hi, Math.max(lo, Number(v)));
+    if (p.kind === "fibre") {
+      const next = { ...p, budget: n(p.budget, 50, 400) };
+      setFBudget(next.budget);
+      setPeople(Number(p.people));
+      setActivities(p.activities as Activity[]);
+      setHomeSize(p.homeSize as "small" | "medium" | "large");
+      setFlexible(Boolean(p.flexible));
+      await run(next);
+    } else if (p.kind === "mobile") {
+      const next = { ...p, budget: n(p.budget, 30, 300) };
+      setMBudget(next.budget);
+      setUsage(p.usage as "light" | "moderate" | "heavy" | "max");
+      setLines(Number(p.lines));
+      setHotspot(Boolean(p.hotspot));
+      setRoaming(p.roaming as "never" | "sometimes" | "often");
+      await run(next);
+    }
+  }
+
   async function toggleSave(id: string) {
     const on = saved.includes(id);
     setSaved((s) => (on ? s.filter((x) => x !== id) : [id, ...s]));
@@ -358,7 +381,7 @@ export function PlanFinder({ initial }: { initial: FinderInitial }) {
               )}
             </div>
             {error && <p role="alert" className="mt-5 rounded-2xl bg-sambal-soft px-4 py-3 text-[#a1260f]">{error}</p>}
-            <button type="button" onClick={run} disabled={loading} className={cn(btn.primary, "mt-7 w-full text-lg sm:w-auto")}>
+            <button type="button" onClick={() => run()} disabled={loading} className={cn(btn.primary, "mt-7 w-full text-lg sm:w-auto")}>
               {loading ? <LoaderCircle className="h-5 w-5 animate-spin" /> : <Sparkles className="h-5 w-5" />} Show my best matches
             </button>
           </Card>
@@ -383,7 +406,7 @@ export function PlanFinder({ initial }: { initial: FinderInitial }) {
                     {showAll ? "Show top 6 only" : `Show all ${recs.length} ranked plans`}
                   </button>
                 )}
-                {rankedFrom && <PlanAssistant key={rankedFrom.version} prefs={rankedFrom.prefs} />}
+                {rankedFrom && <PlanAssistant key={kind} prefs={rankedFrom.prefs} onApply={applyProposal} />}
               </section>
             )}
           </div>

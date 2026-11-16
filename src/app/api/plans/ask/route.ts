@@ -1,10 +1,10 @@
 import { and, count, eq, gt } from "drizzle-orm";
 import { db } from "@/db";
 import { aiUsage } from "@/db/schema";
-import { buildPlanChatMessages, cleanChatReply, trimHistory } from "@/lib/ai";
+import { PROPOSE_ANSWERS_TOOL, buildPlanChatMessages, cleanChatReply, extractProposal, proposalFromMessage, trimHistory } from "@/lib/ai";
 import { PLANS_REVIEWED, getPlan } from "@/lib/plans";
 import { PROVIDERS } from "@/lib/providers";
-import { describePrefs, parsePrefs, recommend } from "@/lib/recommend";
+import { describePrefs, parsePrefs, proposeChange, recommend } from "@/lib/recommend";
 import { ensureSchema, getUserId, jsonError, readJson } from "@/lib/server";
 
 export const dynamic = "force-dynamic";
@@ -46,21 +46,31 @@ export async function POST(req: Request) {
   });
 
   let text: string | null = null;
+  let toolPatch: Record<string, unknown> | null = null;
   try {
     const res = await fetch(`${base.replace(/\/$/, "")}/chat/completions`, {
       method: "POST",
       headers: { authorization: `Bearer ${key}`, "content-type": "application/json" },
-      body: JSON.stringify({ model, messages, max_tokens: 800 }),
+      body: JSON.stringify({ model, messages, max_tokens: 800, tools: [PROPOSE_ANSWERS_TOOL], tool_choice: "auto" }),
       signal: AbortSignal.timeout(45_000),
     });
     if (!res.ok) throw new Error(`AI provider returned ${res.status}`);
     const data = await res.json();
-    text = cleanChatReply(String(data?.choices?.[0]?.message?.content ?? ""));
+    const message = data?.choices?.[0]?.message;
+    toolPatch = proposalFromMessage(message);
+    // A tool call can come without text; give the card a short lead-in rather than failing.
+    text = cleanChatReply(String(message?.content ?? "")) ?? (toolPatch ? "Here's what I'd change in your answers:" : null);
   } catch (err) {
     console.error("[plans/ask]", err instanceof Error ? err.message : err);
   }
   if (!text) return jsonError("The assistant couldn't answer just now. Try again in a moment.", 502);
 
+  // The model may propose new answers; they are validated like form input and only applied when the customer taps "Update my matches".
+  const { text: reply, patch: tagPatch } = extractProposal(text);
+  if (!reply) return jsonError("The assistant couldn't answer just now. Try again in a moment.", 502);
+  const patch = toolPatch ?? tagPatch;
+  const proposal = patch ? proposeChange(prefs, patch) : null;
+
   await db.insert(aiUsage).values({ userId, feature: FEATURE });
-  return Response.json({ text, remaining: DAILY_LIMIT - used - 1 });
+  return Response.json({ text: reply, proposal, remaining: DAILY_LIMIT - used - 1 });
 }
