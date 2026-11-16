@@ -46,7 +46,16 @@ export function CaseDetail({ id }: { id: string }) {
   const [error, setError] = useState("");
   const [channel, setChannel] = useState<Channel>("email");
   const [lang, setLang] = useState<"en" | "ms">("en");
-  const [edits, setEdits] = useState<Record<string, string>>({});
+  // Edited/AI-rewritten drafts survive a refresh on this browser. The draft renders only after the case loads, so lazy reading is hydration-safe.
+  const [edits, setEdits] = useState<Record<string, string>>(() => {
+    if (typeof window === "undefined") return {};
+    try {
+      const v: unknown = JSON.parse(localStorage.getItem(`bw_draft_${id}`) ?? "{}");
+      return v && typeof v === "object" && !Array.isArray(v) ? (v as Record<string, string>) : {};
+    } catch {
+      return {};
+    }
+  });
   const [copied, setCopied] = useState(false);
   const [copyFailed, setCopyFailed] = useState(false);
   const [aiBusy, setAiBusy] = useState<RewriteAction | null>(null);
@@ -116,7 +125,16 @@ export function CaseDetail({ id }: { id: string }) {
 
   // Drafts are derived from the case; manual edits are remembered per channel/language variant.
   const draft = edits[generated] ?? generated;
-  const setDraft = (value: string) => setEdits((m) => ({ ...m, [generated]: value }));
+  const setDraft = (value: string) =>
+    setEdits((m) => {
+      const next = { ...m, [generated]: value };
+      try {
+        localStorage.setItem(`bw_draft_${id}`, JSON.stringify(next));
+      } catch {
+        /* storage blocked: the draft still works for this visit */
+      }
+      return next;
+    });
 
   async function rewrite(action: RewriteAction) {
     setAiBusy(action);
@@ -304,23 +322,25 @@ export function CaseDetail({ id }: { id: string }) {
             </div>
             <label className="sr-only" htmlFor="draft">Message draft</label>
             <textarea id="draft" key={flash} aria-busy={aiBusy !== null} className={cn("field mt-4 font-mono text-[0.92rem] leading-relaxed", flash > 0 && "animate-flash")} rows={channel === "chat" ? 7 : 16} value={draft} onChange={(e) => { setDraft(e.target.value); setUndo(null); setAiDone(""); }} />
-            <div className="mt-3 rounded-2xl bg-cream/60 p-3">
-              <div role="group" aria-label="AI rewrite" className="flex flex-wrap items-center gap-2">
-                <span className="flex items-center gap-1.5 text-sm font-semibold"><Sparkles className="h-4 w-4" /> AI rewrite</span>
-                {(Object.keys(REWRITE_ACTIONS) as RewriteAction[]).map((a) => (
-                  <button key={a} type="button" disabled={aiBusy !== null} onClick={() => rewrite(a)} className={cn(btn.secondary, btnSm, "disabled:opacity-60")}>
-                    {aiBusy === a && <LoaderCircle className="h-4 w-4 animate-spin" />} {REWRITE_ACTIONS[a].label}
-                  </button>
-                ))}
+            <div className="mt-3 rounded-2xl bg-cream/60 p-4">
+              <div className="flex min-h-9 items-center justify-between gap-3">
+                <span className="flex items-center gap-1.5 text-sm font-semibold"><Sparkles className="h-4 w-4" aria-hidden /> AI rewrite</span>
                 {undo?.key === generated && (
                   <button type="button" disabled={aiBusy !== null} onClick={() => { setDraft(undo.text); setUndo(null); setAiDone("Original draft restored."); }} className={cn(btn.ghost, btnSm, "disabled:opacity-60")}>
-                    <Undo2 className="h-4 w-4" /> Undo
+                    <Undo2 className="h-4 w-4" aria-hidden /> Undo
                   </button>
                 )}
               </div>
-              <p className="mt-2 text-xs text-muted">Sends this draft and the case details (plus your timeline notes, for Add my notes) to an AI service. It only rewords what&apos;s here; check the result before you send it.</p>
-              <p role="status" className="mt-1 text-sm font-semibold empty:hidden">{aiDone}</p>
-              {aiError && <p role="alert" className="mt-2 text-sm font-semibold text-[#a1260f]">{aiError}</p>}
+              <div role="group" aria-label="AI rewrite" className="mt-2 flex flex-wrap gap-2">
+                {(Object.keys(REWRITE_ACTIONS) as RewriteAction[]).map((a) => (
+                  <button key={a} type="button" disabled={aiBusy !== null} onClick={() => rewrite(a)} className={cn(btn.secondary, btnSm, "disabled:opacity-60")}>
+                    {aiBusy === a && <LoaderCircle className="h-4 w-4 animate-spin" aria-hidden />} {REWRITE_ACTIONS[a].label}
+                  </button>
+                ))}
+              </div>
+              <p role="status" className="mt-3 flex items-center gap-1.5 text-sm font-semibold text-pandan-dark empty:hidden">{aiDone && <><CircleCheck className="h-4 w-4 shrink-0" aria-hidden /> {aiDone}</>}</p>
+              {aiError && <p role="alert" className="mt-3 text-sm font-semibold text-[#a1260f]">{aiError}</p>}
+              <p className="mt-3 border-t border-line pt-3 text-xs leading-relaxed text-muted">Sends this draft and the case details (plus your timeline notes, for Add my notes) to an AI service. It only rewords what&apos;s here; check the result before you send it.</p>
             </div>
             <div className="mt-3 flex flex-wrap gap-2">
               <button type="button" onClick={copy} className={btn.primary}>{copied ? <Check className="h-5 w-5" /> : <Copy className="h-5 w-5" />} {copied ? "Copied!" : "Copy message"}</button>
