@@ -55,10 +55,12 @@ const FAQ = [
 
 function HeroReceipt() {
   const rows = [
-    { label: "Unifi Home 300Mbps", amount: "139.00", note: "Promised RM129 — you're overpaying", tone: "bg-kunyit text-ink" },
+    { label: "Unifi Home 300Mbps", amount: "139.00", note: "Promised RM129 — ask if the promo ended", tone: "bg-kunyit text-ink" },
     { label: "Unifi TV Add-on Pack", amount: "49.00" },
+    { label: "Mesh Wi-Fi Add-on (2 units)", amount: "20.00" },
     { label: "Late payment charge", amount: "10.00", note: "Ask for a one-time waiver", tone: "bg-sambal text-white" },
-    { label: "Service tax 6%", amount: "12.48", note: "Correct — telco SST is 6%", tone: "bg-pandan text-white" },
+    { label: "Service tax 6%", amount: "12.48", note: "Matches 6% telco service tax", tone: "bg-pandan text-white" },
+    { label: "Rounding adjustment", amount: "0.02" },
   ];
   return (
     <div className="relative mx-auto w-full max-w-md lg:mr-0">
@@ -102,7 +104,7 @@ function HeroReceipt() {
         </div>
       </div>
       <div className="absolute -right-2 -top-5 rotate-3 rounded-2xl bg-pandan px-4 py-2.5 text-white shadow-lift md:-right-6">
-        <p className="text-xs font-semibold uppercase tracking-wider text-white/80">Could save</p>
+        <p className="text-xs font-semibold uppercase tracking-wider text-white/80">Could save up to</p>
         <p className="font-display text-lg font-bold">RM480/yr</p>
       </div>
     </div>

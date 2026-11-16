@@ -364,9 +364,9 @@ export function decodeBill(input: DecodeInput): Analysis {
       const over = round2(tax - expected);
       taxItems.forEach((i) => (i.flagged = true));
       add({
-        severity: "high",
-        title: "Service tax looks like 8% — telco services are taxed at 6%",
-        detail: `Your bill shows ${rm(tax)} in service tax. At the 6% rate for telecommunication services it should be about ${rm(expected)}. The 8% rate introduced in March 2024 does not apply to telco services. Ask ${providerName} to correct it and refund ${rm(over)}.`,
+        severity: "medium",
+        title: "Service tax looks like 8% — telco services are usually 6%",
+        detail: `Your bill shows ${rm(tax)} in service tax. At the 6% rate for telecommunication services it would be about ${rm(expected)}. The 8% rate from March 2024 generally doesn't apply to telco services, but some non-telco items on a bill can be taxed differently. Ask ${providerName} which rate applies to each line, and to correct it and refund ${rm(over)} if it should be 6%.`,
         amount: over > 0 ? over : undefined,
         itemIds: taxItems.map((i) => i.id),
         action: "dispute",
@@ -420,8 +420,9 @@ export function decodeBill(input: DecodeInput): Analysis {
       add({
         severity: "high",
         title: `You're paying ${rm(over)} more than the price you signed up for`,
-        detail: `Your plan charges come to ${rm(planNet)} a month before tax, but you were promised ${rm(p)}. Over a year that's ${rm(over * 12)}. Ask ${providerName} to apply the agreed price and credit the difference.`,
+        detail: `Your plan charges come to ${rm(planNet)} a month before tax, but you said you were promised ${rm(p)}. Over a year that's ${rm(over * 12)}. A promotional price may simply have ended — check your contract or offer letter. If it shows ${rm(p)} for this period, ask ${providerName} to apply it and credit the difference; if not, ask whether a current offer can bring it back down.`,
         amount: over,
+        itemIds: by("plan").map((i) => i.id),
         action: "dispute",
         issueType: "promo",
       });

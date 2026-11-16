@@ -212,8 +212,9 @@ export const ESCALATION = {
     hotline: "1800-188-030",
   },
   gcc: [
-    { days: 3, text: "Acknowledge your complaint within 3 working days" },
-    { days: 7, text: "Respond within 7 days with a solution or a timeline" },
-    { days: 30, text: "Resolve at least 95% of complaints within 30 business days" },
+    // GCC 2nd ed. (Nov 2022) cl. 7.3.1 & 7.3.3. shortcut: `days` is a calendar-day approximation of working days, used only for the case-page reminder.
+    { days: 3, text: "Acknowledge your complaint: on the spot for calls or counter visits, within 1 working day for email, web or app, within 3 working days for letters" },
+    { days: 6, text: "Propose a resolution within 3 working days of acknowledging a simple complaint" },
+    { days: 22, text: "Propose a resolution within 15 working days for a complex complaint, or explain the delay and give a timeframe" },
   ],
 };

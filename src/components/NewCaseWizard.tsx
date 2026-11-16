@@ -13,6 +13,7 @@ export interface CasePrefill {
   issue?: IssueType;
   amount?: string;
   label?: string;
+  month?: string;
   analysis?: string;
 }
 
@@ -34,7 +35,7 @@ export function NewCaseWizard({ prefill }: { prefill: CasePrefill }) {
   const [step, setStep] = useState(initialStep);
   const [provider, setProvider] = useState<ProviderId | null>(prefill.provider ?? null);
   const [issue, setIssue] = useState<IssueType | null>(prefill.issue ?? null);
-  const [billMonth, setBillMonth] = useState(() => new Date().toISOString().slice(0, 7));
+  const [billMonth, setBillMonth] = useState(() => prefill.month ?? new Date().toISOString().slice(0, 7));
   const [chargeLabel, setChargeLabel] = useState(prefill.label ?? "");
   const [amount, setAmount] = useState(prefill.amount ?? "");
   const [accountRef, setAccountRef] = useState("");

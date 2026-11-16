@@ -17,6 +17,7 @@ export default async function NewCasePage({ searchParams }: { searchParams: Prom
     issue: isIssueType(issue) ? issue : undefined,
     amount: amount && /^\d+(\.\d+)?$/.test(amount) ? amount : undefined,
     label: get("label")?.slice(0, 140),
+    month: /^\d{4}-(0[1-9]|1[0-2])$/.test(get("month") ?? "") ? get("month") : undefined,
     analysis: get("analysis"),
   };
   return (

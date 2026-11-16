@@ -233,7 +233,7 @@ export function CaseDetail({ id }: { id: string }) {
         )}
 
         {active && days !== null && (
-          <div className={cn("mt-5 rounded-2xl p-4", days > 30 ? "bg-sambal-soft" : days > 7 ? "bg-kunyit-soft" : "bg-sky-soft")}>
+          <div className={cn("mt-5 rounded-2xl p-4", days > 22 ? "bg-sambal-soft" : days > 6 ? "bg-kunyit-soft" : "bg-sky-soft")}>
             <p className="flex items-center gap-2 font-semibold"><Clock className="h-5 w-5" /> {days === 0 ? "Raised today" : `Raised ${days} day${days > 1 ? "s" : ""} ago`}</p>
             <ul className="mt-2 grid gap-1 sm:grid-cols-3">
               {ESCALATION.gcc.map((g) => (
@@ -243,7 +243,7 @@ export function CaseDetail({ id }: { id: string }) {
                 </li>
               ))}
             </ul>
-            {days > 7 && status !== "escalated" && <p className="mt-2 text-sm font-semibold">No satisfactory answer after 7 days? You can escalate to CFM — details below.</p>}
+            {days > 6 && status !== "escalated" && <p className="mt-2 text-sm font-semibold">Not happy with their answer, or no proposed resolution in time? You can escalate to CFM — details below.</p>}
           </div>
         )}
       </section>

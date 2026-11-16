@@ -18,7 +18,7 @@ export default function ProvidersPage() {
         intro="Customer service channels, self-service apps and coverage checkers for Malaysia's six main telcos. Details come from each provider's own site — confirm anything time-sensitive directly with them."
       />
       <div className="mx-auto max-w-6xl px-4 py-8">
-        <div className="grid gap-6 md:grid-cols-2">
+        <div className="grid grid-cols-1 gap-6 md:grid-cols-2">
           {PROVIDER_IDS.map((id) => {
             const p = PROVIDERS[id];
             const fibre = PLANS.filter((x) => x.provider === id && x.kind === "fibre").length;
@@ -39,7 +39,7 @@ export default function ProvidersPage() {
                         <a href={c.href} target={c.href.startsWith("http") ? "_blank" : undefined} rel="noreferrer" className="flex items-center gap-3 rounded-2xl border-2 border-line px-3 py-2.5 transition hover:border-ink/40">
                           <span className="grid h-10 w-10 shrink-0 place-items-center rounded-xl bg-cream"><Icon className="h-5 w-5" /></span>
                           <span>
-                            <span className="block font-display text-lg font-bold leading-tight">{c.value}</span>
+                            <span className="block break-all font-display text-lg font-bold leading-tight">{c.value}</span>
                             <span className="text-sm text-muted">{c.label}{c.note ? ` · ${c.note}` : ""}</span>
                           </span>
                         </a>

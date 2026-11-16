@@ -52,6 +52,8 @@ export function AnalysisView({ analysis, id, title, createdAt }: { analysis: Ana
       const labels = [...new Set(a.items.filter((i) => f.itemIds?.includes(i.id)).map((i) => i.label))];
       q.set("label", (labels.length ? labels.join(", ") : f.title).replace(/[“”]/g, "\""));
     }
+    const d = (m.period ?? m.billDate)?.match(/\b\d{1,2}[/.-](\d{1,2})[/.-](\d{4})\b/);
+    if (d) q.set("month", `${d[2]}-${d[1].padStart(2, "0")}`);
     if (id) q.set("analysis", id);
     return `/help/new?${q.toString()}`;
   };

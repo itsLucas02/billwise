@@ -48,3 +48,7 @@ Five canonical roles mapped one-to-one (`needs-triage`, `needs-info`, `ready-for
 ### Domain docs
 
 Single-context: `GLOSSARY.md` and `docs/adr/` at the repo root. See `docs/agents/domain.md`.
+
+## Bounty submission
+
+BillWise is an entry for the KrackedDevs "Build for Better Connectivity" bounty (deadline Mon 16 Nov 2026, 11:59 PM MYT). Scope, requirements mapping, the judge journey and the open real-provider-name risk are in [`docs/BOUNTY.md`](docs/BOUNTY.md); the copy-paste submission text is in [`docs/SUBMISSION.md`](docs/SUBMISSION.md). Keep the bill-to-enquiry flow working; prefer finishing it over adding features.

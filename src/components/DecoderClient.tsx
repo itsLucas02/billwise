@@ -124,7 +124,7 @@ export function DecoderClient({ initialSample }: { initialSample?: string }) {
 
   return (
     <>
-      <div className="mx-auto grid max-w-6xl gap-6 px-4 py-8 lg:grid-cols-[1fr_330px]">
+      <div className="mx-auto grid max-w-6xl grid-cols-1 gap-6 px-4 py-8 lg:grid-cols-[minmax(0,1fr)_330px]">
         <Card className="!p-0 overflow-hidden">
           <div role="tablist" aria-label="How do you want to add your bill?" className="scrollbar-none flex gap-1 overflow-x-auto border-b border-line bg-cream/50 p-2">
             {tabs.map((t) => (

@@ -30,7 +30,7 @@ export function HomeActivity() {
       <div className="rounded-3xl border border-line bg-white p-5 shadow-card md:p-7">
         <h2 id="resume-title" className="font-display text-2xl font-bold tracking-tight">Pick up where you left off</h2>
         <p className="text-muted">Saved on this browser — no account needed.</p>
-        <div className="mt-5 grid gap-4 md:grid-cols-3">
+        <div className="mt-5 grid grid-cols-1 gap-4 md:grid-cols-3">
           <div>
             <p className="mb-2 flex items-center gap-2 text-sm font-bold uppercase tracking-wider text-muted"><ScanText className="h-4 w-4" /> Decoded bills</p>
             <ul className="space-y-2">

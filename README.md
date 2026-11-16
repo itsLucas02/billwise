@@ -12,6 +12,20 @@ No sign-up, no AI, no scraping. Everything is a deterministic rule engine over a
 
 ---
 
+## Bounty entry: Build for Better Connectivity
+
+Entry for the [KrackedDevs bounty](https://krackeddevs.com/code/bounty/build-for-better-connectivity). **User:** an ordinary Malaysian broadband customer. **Problem:** a bill that is higher than expected or has charges they don't understand. **Outcome:** understand the bill, see what is confirmed and what is uncertain, and leave with an editable billing enquiry (English or BM) tracked as a case. Nothing is sent to the provider. Details: [`docs/BOUNTY.md`](docs/BOUNTY.md), submission text: [`docs/SUBMISSION.md`](docs/SUBMISSION.md).
+
+Try it at <https://billwise-blush.vercel.app>:
+
+1. Open the homepage, then "Try a sample bill" (Unifi promo-expiry sample) or paste your own.
+2. Read the breakdown: findings ranked "Act on this", "Worth checking", "Good to know" or "Looks fine", savings estimates with assumptions.
+3. On a questionable charge, start a billing enquiry. Provider, charge, amount and analysis link carry over.
+4. Create the case, then edit and copy the enquiry (English or BM) and check the evidence checklist.
+5. Record the provider's reference, change status, add notes. Refresh and reopen: it is saved.
+
+---
+
 ## Why
 
 Telco bills in Malaysia are dense, bilingual, and full of line items that are easy to miss. People overpay for months without noticing a promo ended, a content subscription they never wanted, or a paper-bill fee they thought was abolished. BillWise reads the bill the way a careful friend would: it names what it found, says how confident it is, and tells you what to do next.
