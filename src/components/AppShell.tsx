@@ -140,6 +140,12 @@ export function AppShell({ children }: { children: ReactNode }) {
             </ul>
           </div>
         </div>
+        <div className="mx-auto max-w-6xl border-t border-line px-4 py-5 text-sm text-muted">
+          Created by{" "}
+          <a className="font-semibold text-ink underline decoration-line decoration-2 underline-offset-4 hover:decoration-ink" href="https://aizzul.com/" target="_blank" rel="noreferrer">
+            Aizzul Luqman
+          </a>
+        </div>
       </footer>
 
       <nav
