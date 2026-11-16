@@ -6,6 +6,7 @@ import {
   Building2, CircleCheck, ExternalLink, Gauge, House, Info, LifeBuoy, LoaderCircle, MapPin, Plus, RadioTower, ShieldCheck, Signal, Smartphone, Sparkles, Store, Trash2, Wifi,
 } from "lucide-react";
 import { api } from "@/lib/client";
+import { ConfirmDelete } from "./ConfirmDelete";
 import {
   PROPERTY_LABEL, STATUS_LABEL, areaNotes, isEastMalaysia, rateRSRP, rateSINR, rateSpeed, stateFromPostcode,
   type CoverageStatus, type PropertyType,
@@ -96,8 +97,7 @@ export function CoverageClient({ initialCheck }: { initialCheck?: string }) {
   }
 
   async function remove(id: string) {
-    if (!confirm("Delete this address and its results?")) return;
-    await api(`/api/coverage/${id}`, { method: "DELETE" }).catch(() => {});
+    await api(`/api/coverage/${id}`, { method: "DELETE" }); // errors surface in ConfirmDelete
     setChecks((c) => (c ?? []).filter((x) => x.id !== id));
     setSelectedId(null);
   }
@@ -212,7 +212,7 @@ export function CoverageClient({ initialCheck }: { initialCheck?: string }) {
                       <h2 className="font-display text-3xl font-bold tracking-tight">{selected.label}</h2>
                       <p className="mt-1 text-lg text-ink-soft">{selected.postcode} · {selected.state ?? "Unknown state"}{isEastMalaysia(selected.state) ? " · East Malaysia" : selected.state ? " · Peninsular Malaysia" : ""}</p>
                     </div>
-                    <button type="button" onClick={() => remove(selected.id)} className={cn(btn.danger, btnSm)}><Trash2 className="h-4 w-4" /> Delete</button>
+                    <ConfirmDelete question="Delete this address and its results?" onConfirm={() => remove(selected.id)} />
                   </div>
                   <div className="mt-4">
                     <div className="flex items-center justify-between text-sm font-semibold"><span>{checkedCount} of {FIBRE_IDS.length} fibre providers checked</span><span>{confirmed.length} available</span></div>

@@ -5,6 +5,7 @@ import { useRouter } from "next/navigation";
 import { useEffect, useState } from "react";
 import { ArrowLeft, ChevronDown, LoaderCircle, ScanText, Trash2 } from "lucide-react";
 import { api } from "@/lib/client";
+import { ConfirmDelete } from "./ConfirmDelete";
 import type { Analysis } from "@/lib/decoder";
 import { AnalysisView } from "./AnalysisView";
 import { EmptyState, SimTag, btn, btnSm, cn } from "./ui";
@@ -21,8 +22,7 @@ export function SavedAnalysis({ id }: { id: string }) {
   }, [id]);
 
   async function remove() {
-    if (!confirm("Delete this decoded bill?")) return;
-    await api(`/api/decoder/${id}`, { method: "DELETE" }).catch(() => {});
+    await api(`/api/decoder/${id}`, { method: "DELETE" }); // errors surface in ConfirmDelete
     router.push("/decoder");
   }
 
@@ -33,7 +33,7 @@ export function SavedAnalysis({ id }: { id: string }) {
         {data && (
           <div className="flex items-center gap-2">
             {data.source === "sample" && <SimTag label="Specimen sample" />}
-            <button type="button" onClick={remove} className={cn(btn.danger, btnSm)}><Trash2 className="h-4 w-4" /> Delete</button>
+            <ConfirmDelete question="Delete this decoded bill for good?" onConfirm={remove} />
           </div>
         )}
       </div>

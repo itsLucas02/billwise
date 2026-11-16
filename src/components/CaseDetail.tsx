@@ -8,6 +8,7 @@ import {
 } from "lucide-react";
 import { REWRITE_ACTIONS, type RewriteAction } from "@/lib/ai";
 import { api } from "@/lib/client";
+import { ConfirmDelete } from "./ConfirmDelete";
 import { ISSUES, STATUS_INFO, draftMessage, type CaseStatus, type Channel, type IssueType } from "@/lib/cases";
 import { ESCALATION, PROVIDERS, isProviderId, type ProviderId } from "@/lib/providers";
 import { daysSince, fmtDate, rm } from "@/lib/format";
@@ -204,8 +205,13 @@ export function CaseDetail({ id }: { id: string }) {
   }
 
   async function remove() {
-    if (!confirm("Delete this case and its history?")) return;
-    await api(`/api/cases/${id}`, { method: "DELETE" }).catch(() => {});
+    await api(`/api/cases/${id}`, { method: "DELETE" }); // errors surface in ConfirmDelete
+    try {
+      localStorage.removeItem(`bw_draft_${id}`);
+      localStorage.removeItem(`bw_case_${id}`);
+    } catch {
+      /* storage blocked: nothing to clean */
+    }
     router.push("/help");
   }
 
@@ -453,7 +459,7 @@ export function CaseDetail({ id }: { id: string }) {
             <p className="mt-3 text-sm text-muted">Include your provider reference number{item.providerRef ? ` (${item.providerRef})` : ""}, the timeline above, and copies of your bills.</p>
           </Card>
 
-          <button type="button" onClick={remove} className={cn(btn.danger, btnSm)}><Trash2 className="h-4 w-4" /> Delete case</button>
+          <ConfirmDelete label="Delete case" question="Delete this case and its history for good?" onConfirm={remove} />
         </div>
       </div>
     </div>
