@@ -15,7 +15,7 @@ export default function ProvidersPage() {
       <PageHeader
         eyebrow="Provider directory · Direktori penyedia"
         title={<>Who to contact, and <span className="mark">how</span></>}
-        intro="Customer service channels, self-service apps and coverage checkers for Malaysia's six main telcos. Details come from each provider's own site — confirm anything time-sensitive directly with them."
+        intro="Customer service channels, self-service apps and coverage checkers for seven Malaysian telcos. Details come from each provider's own site — confirm anything time-sensitive directly with them."
       />
       <div className="mx-auto max-w-6xl px-4 py-8">
         <div className="grid grid-cols-1 gap-6 md:grid-cols-2">

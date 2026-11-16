@@ -383,7 +383,7 @@ export function PlanFinder({ initial }: { initial: FinderInitial }) {
                     {([["never", "Rarely"], ["sometimes", "1–3 times a year"], ["often", "Often"]] as const).map(([v, l]) => <Chip key={v} on={roaming === v} onClick={() => setRoaming(v)}>{l}</Chip>)}
                   </Q>
                   <Q n={6} title="Which networks have good signal where you live & work?" hint="Optional — skip if you're not sure.">
-                    {(["unifi", "maxis", "celcomdigi", "umobile"] as ProviderId[]).map((id) => <Chip key={id} on={goodSignal.includes(id)} onClick={() => setGoodSignal(toggle(goodSignal, id))}>{PROVIDERS[id].name}</Chip>)}
+                    {(["unifi", "maxis", "celcomdigi", "umobile", "yes"] as ProviderId[]).map((id) => <Chip key={id} on={goodSignal.includes(id)} onClick={() => setGoodSignal(toggle(goodSignal, id))}>{PROVIDERS[id].name}</Chip>)}
                   </Q>
                 </>
               )}

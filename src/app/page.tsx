@@ -126,7 +126,7 @@ export default function HomePage() {
               Understand your <span className="mark">telco bill</span>. Pay only for what you need.
             </h1>
             <p className="mt-5 max-w-xl text-lg leading-relaxed text-muted md:text-xl">
-              BillWise explains confusing charges in plain language, spots overcharges, compares plans from six Malaysian telcos, and
+              BillWise explains confusing charges in plain language, spots overcharges, compares plans from seven Malaysian telcos, and
               walks you through fixing billing problems — step by step.
             </p>
             <div className="mt-8 flex flex-col gap-3 sm:flex-row">
@@ -209,7 +209,7 @@ export default function HomePage() {
           </div>
           <div className="grid gap-4 sm:grid-cols-3 lg:grid-cols-1">
             {[
-              { t: "Real plans, with sources", d: `${PLANS.length} plans from Unifi, Maxis, CelcomDigi, TIME, Allo and U Mobile — each linked to the provider's own plan page (checked ${PLANS_REVIEWED}).` },
+              { t: "Real plans, with sources", d: `${PLANS.length} plans from Unifi, Maxis, CelcomDigi, TIME, Allo, U Mobile and Yes — each linked to the provider's own plan page (checked ${PLANS_REVIEWED}).` },
               { t: "No invented coverage", d: "We never claim a service is available at your address. Only the provider checkers — and what you record — count." },
               { t: "Sample bills are labelled", d: "Provider names, plans and contact details are real. Sample bills use invented account numbers and carry a clear “Specimen” tag, so you always know what's what." },
             ].map((x) => (

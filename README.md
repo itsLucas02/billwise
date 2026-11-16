@@ -4,7 +4,7 @@
 
 **Live demo:** <https://billwise-blush.vercel.app>
 
-BillWise is a bill-decoding and plan-shopping demo for Malaysian telco customers. Paste in a bill from Unifi, Maxis, CelcomDigi, TIME, Allo or U Mobile and get a line-by-line breakdown with concrete findings — duplicate charges, an 8% SST line where telco tax should be 6%, a rebate that is about to expire, a device instalment running longer than it should. It also compares 46 plans across the 6 providers, walks you through coverage checks without guessing, and gives you a workspace to escalate a billing dispute through the right channels.
+BillWise is a bill-decoding and plan-shopping demo for Malaysian telco customers. Paste in a bill from Unifi, Maxis, CelcomDigi, TIME, Allo, U Mobile or Yes and get a line-by-line breakdown with concrete findings — duplicate charges, an 8% SST line where telco tax should be 6%, a rebate that is about to expire, a device instalment running longer than it should. It also compares 52 plans across the 7 providers, walks you through coverage checks without guessing, and gives you a workspace to escalate a billing dispute through the right channels.
 
 > **The providers are real; the bills are not.** Provider names, plan names, prices, contact details and source links come from each telco's own published pages and were last checked by hand in Nov 2026. The six sample bills use invented account numbers and amounts. BillWise is independent and not affiliated with any provider — always confirm prices on the provider's site before switching.
 
@@ -52,7 +52,7 @@ Analyses are saved per browser and reachable again at `/decoder/[id]`, including
 
 - **Recommend** — a transparent weighted heuristic (no ML). You give budget, household size, activities, home type, contract preference, and which providers you have confirmed at your address. It computes a required speed or data allowance, scores every plan, and returns a match ring with up to four reasons and three cautions per plan.
 - **Ask about these matches** — an optional AI assistant under the results. Ask "why is this first?" or "is a cheaper plan enough for three of us working from home?" in English or Bahasa Malaysia. The server re-runs the ranking from your answers and gives the model only that ranking, its reasons and cautions, and the catalogue entries with their sources and the date prices were checked. It explains and asks follow-up questions; it never reorders plans, invents prices or claims coverage, and sends you back to the form when your needs change. 10 questions per browser per day.
-- **Browse all 46** — filter by provider, max price, minimum speed or data; sort by price, speed, or best value.
+- **Browse all 52** — filter by provider, max price, minimum speed or data; sort by price, speed, or best value.
 - **Saved** — a shortlist you keep across visits.
 - **Compare** — `/plans/compare?ids=…` puts up to four plans side by side, including 24-month cost with SST, and highlights the best cell per row.
 
@@ -76,7 +76,7 @@ A case tracks status (`open → contacted → awaiting → resolved`, plus `esca
 
 ### Providers — `/providers`
 
-A directory of the six providers with support channels, apps, coverage-checker links, and the CFM and MCMC hotlines.
+A directory of the seven providers with support channels, apps, coverage-checker links, and the CFM and MCMC hotlines.
 
 ---
 
@@ -95,7 +95,7 @@ The domain logic lives in `src/lib/` as pure, testable TypeScript:
 ```
 src/lib/
 ├── decoder.ts     bill parser + 15 finding passes + savings engine
-├── plans.ts       static catalogue: 46 plans across 6 providers
+├── plans.ts       static catalogue: 52 plans across 7 providers (Yes added 17 Nov 2026: 6 no-contract postpaid plans)
 ├── providers.ts   provider profiles, contacts, detection regexes, escalation
 ├── recommend.ts   weighted heuristic scorer for fibre and mobile
 ├── cases.ts       issue catalogue + EN/BM message drafting

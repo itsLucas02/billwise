@@ -11,6 +11,9 @@ import {
   type CoverageStatus, type PropertyType,
 } from "@/lib/coverage";
 import { PROVIDERS, PROVIDER_IDS, type ProviderId } from "@/lib/providers";
+
+// The address checklist is about fibre; mobile-only providers (Yes) are covered by the signal section.
+const FIBRE_IDS = PROVIDER_IDS.filter((id) => PROVIDERS[id].services.includes("fibre"));
 import { relativeTime, speedLabel } from "@/lib/format";
 import { Badge, Card, EmptyState, ProviderBadge, btn, btnSm, cn } from "./ui";
 
@@ -103,7 +106,7 @@ export function CoverageClient({ initialCheck }: { initialCheck?: string }) {
     () => (selected ? PROVIDER_IDS.filter((id) => selected.statuses[id] === "available") : []),
     [selected],
   );
-  const checkedCount = selected ? PROVIDER_IDS.filter((id) => (selected.statuses[id] ?? "unchecked") !== "unchecked").length : 0;
+  const checkedCount = selected ? FIBRE_IDS.filter((id) => (selected.statuses[id] ?? "unchecked") !== "unchecked").length : 0;
 
   const signal = rateRSRP(rsrp);
   const sinrNum = sinr.trim() === "" ? null : Number(sinr);
@@ -179,13 +182,13 @@ export function CoverageClient({ initialCheck }: { initialCheck?: string }) {
                 <h2 className="font-display text-lg font-bold">Your addresses</h2>
                 <ul className="mt-3 space-y-2">
                   {checks.map((c) => {
-                    const done = PROVIDER_IDS.filter((id) => (c.statuses[id] ?? "unchecked") !== "unchecked").length;
+                    const done = FIBRE_IDS.filter((id) => (c.statuses[id] ?? "unchecked") !== "unchecked").length;
                     const yes = PROVIDER_IDS.filter((id) => c.statuses[id] === "available").length;
                     return (
                       <li key={c.id}>
                         <button type="button" onClick={() => setSelectedId(c.id)} aria-current={c.id === selectedId} className={cn("w-full rounded-2xl border-2 px-3 py-2.5 text-left transition", c.id === selectedId ? "border-ink" : "border-line hover:border-ink/30")}>
                           <span className="flex items-center gap-2 font-semibold"><MapPin className="h-4 w-4" /> {c.label} · {c.postcode}</span>
-                          <span className="text-sm text-muted">{c.state ?? "Unknown state"} · {done}/6 checked · {yes} available</span>
+                          <span className="text-sm text-muted">{c.state ?? "Unknown state"} · {done}/{FIBRE_IDS.length} checked · {yes} available</span>
                         </button>
                       </li>
                     );
@@ -212,8 +215,8 @@ export function CoverageClient({ initialCheck }: { initialCheck?: string }) {
                     <button type="button" onClick={() => remove(selected.id)} className={cn(btn.danger, btnSm)}><Trash2 className="h-4 w-4" /> Delete</button>
                   </div>
                   <div className="mt-4">
-                    <div className="flex items-center justify-between text-sm font-semibold"><span>{checkedCount} of 6 providers checked</span><span>{confirmed.length} available</span></div>
-                    <div className="mt-1.5 h-2.5 overflow-hidden rounded-full bg-cream"><div className="h-full rounded-full bg-pandan transition-all" style={{ width: `${(checkedCount / 6) * 100}%` }} /></div>
+                    <div className="flex items-center justify-between text-sm font-semibold"><span>{checkedCount} of {FIBRE_IDS.length} fibre providers checked</span><span>{confirmed.length} available</span></div>
+                    <div className="mt-1.5 h-2.5 overflow-hidden rounded-full bg-cream"><div className="h-full rounded-full bg-pandan transition-all" style={{ width: `${(checkedCount / FIBRE_IDS.length) * 100}%` }} /></div>
                   </div>
                   <ul className="mt-4 space-y-2">
                     {areaNotes(selected.state, selected.propertyType as PropertyType).map((n) => (
@@ -226,7 +229,7 @@ export function CoverageClient({ initialCheck }: { initialCheck?: string }) {
                   <h3 id="checklist-title" className="mb-1 font-display text-xl font-bold">Check each provider</h3>
                   <p className="mb-3 text-muted">Open the official checker, enter your full address (with unit number), then record what it says.</p>
                   <ul className="space-y-3">
-                    {PROVIDER_IDS.map((id) => {
+                    {FIBRE_IDS.map((id) => {
                       const p = PROVIDERS[id];
                       const status = (selected.statuses[id] ?? "unchecked") as CoverageStatus;
                       return (
@@ -268,7 +271,7 @@ export function CoverageClient({ initialCheck }: { initialCheck?: string }) {
                         <Sparkles className="h-5 w-5" /> See plans available here
                       </Link>
                     </>
-                  ) : checkedCount === 6 ? (
+                  ) : checkedCount === FIBRE_IDS.length ? (
                     <>
                       <p className="font-display text-xl font-bold">No fibre confirmed at this address yet</p>
                       <p className="mt-1 leading-relaxed text-muted">Options: register interest with providers (networks do expand), consider 5G/4G home broadband from mobile providers, or a mobile plan with generous hotspot data.</p>

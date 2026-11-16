@@ -69,7 +69,7 @@ export function areaNotes(state: string | null, property: PropertyType): string[
 }
 
 export function emptyStatuses(): Record<ProviderId, CoverageStatus> {
-  return { unifi: "unchecked", maxis: "unchecked", celcomdigi: "unchecked", time: "unchecked", allo: "unchecked", umobile: "unchecked" };
+  return { unifi: "unchecked", maxis: "unchecked", celcomdigi: "unchecked", time: "unchecked", allo: "unchecked", umobile: "unchecked", yes: "unchecked" };
 }
 
 /* ───────── signal & speed helpers (interpret the user's own readings) ───────── */

@@ -71,3 +71,8 @@ test("a stated pre-tax 'this month's charges' is not a mismatch; odd apostrophes
   const t = decodeBill({ text: "This month · s charges RM 129.00\nUnifi Home 500Mbps (ST) 119.00\nReconnection Fee (ST) 10.00\nService Tax - ST 129.00 7.74", provider: "unifi" }).findings.map((f) => f.title);
   assert.ok(!t.some((x) => /doesn't match/.test(x)), t.join(" | "));
 });
+
+test("a Yes (YTL) bill is recognised, but the word 'yes' alone is not", () => {
+  assert.equal(decodeBill({ text: "YTL Communications Sdn Bhd\nYes Infinite Basic 58.00\nService Tax 6% 3.48" }).meta.provider, "yes");
+  assert.equal(decodeBill({ text: "Paid with yes thanks\nMonthly fee 58.00" }).meta.provider, null);
+});

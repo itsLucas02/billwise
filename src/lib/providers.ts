@@ -1,6 +1,6 @@
-export type ProviderId = "unifi" | "maxis" | "celcomdigi" | "time" | "allo" | "umobile";
+export type ProviderId = "unifi" | "maxis" | "celcomdigi" | "time" | "allo" | "umobile" | "yes";
 
-export const PROVIDER_IDS: ProviderId[] = ["unifi", "maxis", "celcomdigi", "time", "allo", "umobile"];
+export const PROVIDER_IDS: ProviderId[] = ["unifi", "maxis", "celcomdigi", "time", "allo", "umobile", "yes"];
 
 export type ChannelKind = "phone" | "whatsapp" | "chat" | "web" | "email";
 
@@ -180,6 +180,30 @@ export const PROVIDERS: Record<ProviderId, Provider> = {
     ],
     detect: /u mobile|umobile|u\.com\.my|ultra postpaid/i,
   },
+  yes: {
+    id: "yes",
+    name: "Yes",
+    company: "YTL Communications Sdn Bhd",
+    color: "#111111",
+    ink: "#ffffff",
+    services: ["mobile"],
+    blurb: "YTL's 5G mobile network with no-contract postpaid plans, many with uncapped data.",
+    fibreNetwork: "Yes sells 5G mobile and wireless broadband, not fibre. Its checker shows 5G coverage.",
+    website: "https://www.yes.my",
+    supportUrl: "https://www.yes.my/docs/faq",
+    fibreCheckUrl: "https://www.yes.my/coverage/",
+    mobileMapUrl: "https://www.yes.my/coverage/",
+    app: "MyYes app",
+    channels: [
+      { kind: "chat", label: "Live chat (Ask Sofia)", value: "yes.my / MyYes app", href: "https://www.yes.my/support/offlinechat/" },
+      { kind: "email", label: "Email", value: "yescare@yes.my", href: "mailto:yescare@yes.my" },
+    ],
+    tips: [
+      "Yes postpaid plans on the no-contract tab can be cancelled without a penalty.",
+      "On uncapped plans, check the hotspot allowance: it is capped separately from your data.",
+    ],
+    detect: /yes\.my|ytl communications|yes (postpaid|infinite|power \d+|ai \d+)/i,
+  },
 };
 
 export function isProviderId(v: unknown): v is ProviderId {
@@ -193,7 +217,7 @@ export function primaryContact(id: ProviderId): SupportChannel | undefined {
 }
 
 export function detectProvider(text: string): ProviderId | null {
-  const order: ProviderId[] = ["celcomdigi", "maxis", "umobile", "unifi", "time", "allo"];
+  const order: ProviderId[] = ["celcomdigi", "maxis", "umobile", "unifi", "time", "allo", "yes"];
   for (const id of order) if (PROVIDERS[id].detect.test(text)) return id;
   return null;
 }

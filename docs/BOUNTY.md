@@ -48,6 +48,6 @@ The rest of the app (plan finder, coverage notes, provider directory) supports t
 
 ## Decision and open risk: real provider names
 
-Decision (owner): use the real Malaysian telco names (Unifi, Maxis, CelcomDigi, TIME, Allo, U Mobile). Plan data comes from their public pages, checked Nov 2026. BillWise is independent and not affiliated with any of them.
+Decision (owner): use the real Malaysian telco names (Unifi, Maxis, CelcomDigi, TIME, Allo, U Mobile, Yes). Plan data comes from their public pages, checked Nov 2026. BillWise is independent and not affiliated with any of them.
 
 Risk, still open: the official requirement 6 (confirmed against the brief, see [`BOUNTY-BRIEF.md`](BOUNTY-BRIEF.md)) says "Do not use … a provider’s name, logo, or branding without permission." The body text of the brief says "branding" only, and the Plan Fit idea allows "clearly sourced, dated plans", so the rule can be read either way. Real names are used so the tool is useful to real customers, and no permission has been requested. If judges read that rule strictly, this entry may be marked down or disqualified. The history shows an earlier commit that used fictional providers; reverting to that is the fallback if the risk is judged too high.
