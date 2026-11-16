@@ -1,0 +1,20 @@
+/* Fig 1 "Every line, checked". Red is the subject here (a flag means "question this"), so it is the one colour. */
+.bill-loupe {
+  .bl-flag-body { fill: #e5484d; }
+  .bl-flag-stuck { fill: #c9363b; }
+  .bl-flag-shadow { fill: rgb(15 27 45 / 0.12); }
+  .bl-glass { fill: rgb(255 255 255 / 0.84); stroke: none; }
+  .bl-rim { fill: #d9d4ca; }
+  .bl-mag text { font-weight: 600; }
+
+  [data-mark] { opacity: 0; transition: opacity 360ms ease; }
+  [data-mark][data-on="true"] { opacity: 1; }
+  .bl-flag[data-on="true"] { animation: bl-stick 420ms cubic-bezier(0.23, 1, 0.32, 1); }
+  [data-mag] { opacity: 0; transition: opacity 220ms ease; }
+  [data-mag][data-on="true"] { opacity: 1; }
+}
+@keyframes bl-stick { from { transform: translateX(-6px); } to { transform: none; } }
+@media (prefers-reduced-motion: reduce) {
+  .bill-loupe [data-mark], .bill-loupe [data-mag] { transition: none; }
+  .bill-loupe .bl-flag[data-on="true"] { animation: none; }
+}

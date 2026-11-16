@@ -3,7 +3,7 @@ import {
   ArrowRight, BadgeCheck, Eye, LifeBuoy, RadioTower, ScanText, ShieldCheck, Sparkles, ChevronDown,
 } from "lucide-react";
 import { HomeActivity } from "@/components/HomeActivity";
-import { BillSorter } from "@/components/figures/BillSorter";
+import { BillLoupe } from "@/components/figures/BillLoupe";
 import { SeeItWork } from "@/components/figures/SeeItWork";
 import { ProviderBadge, SimTag, btn } from "@/components/ui";
 import { PLANS, PLANS_REVIEWED } from "@/lib/plans";
@@ -206,10 +206,10 @@ export default function HomePage() {
         <p className="text-sm font-bold uppercase tracking-wider text-pandan-dark">Inside the decoder</p>
         <h2 id="inside-title" className="mt-1 font-display text-3xl font-bold tracking-tight sm:text-4xl">Rules, not guesswork</h2>
         <p className="mt-3 max-w-2xl text-lg leading-relaxed text-ink-soft">
-          BillWise sorts every line of your bill by fixed, checkable rules, the same way every time. Each charge lands in its bin, and anything worth questioning gets flagged. AI only helps word your enquiry afterwards.
+          BillWise reads your bill one line at a time and checks each charge against fixed rules, the same way every time. Lines that are normal get a tick; anything worth questioning gets flagged with a plain reason. AI only helps word your enquiry afterwards.
         </p>
         <div className="mt-6">
-          <BillSorter />
+          <BillLoupe />
         </div>
       </section>
 

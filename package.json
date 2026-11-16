@@ -9,7 +9,7 @@
     "lint": "eslint .",
     "typecheck": "tsc --noEmit",
     "test": "node --test 'src/**/*.test.ts'",
-    "figures": "node scripts/figures/bill-sorter.mjs"
+    "figures": "node scripts/figures/bill-loupe.mjs"
   },
   "dependencies": {
     "dotenv": "17.3.1",
