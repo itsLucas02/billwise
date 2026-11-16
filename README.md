@@ -34,7 +34,7 @@ Telco bills in Malaysia are dense, bilingual, and full of line items that are ea
 
 ### Bill decoder — `/decoder`
 
-Accepts a pasted bill (or six simulated samples, or manually entered rows). The engine in `src/lib/decoder.ts` classifies every charge into one of 15 categories and runs 15 finding passes, including:
+Accepts an uploaded e-bill PDF (read in the browser with PDF.js; the file never leaves the device), a pasted bill, six simulated samples, or manually entered rows. Text-based PDFs only; scans need the charges typed in. The engine in `src/lib/decoder.ts` classifies every charge into one of 15 categories and runs 15 finding passes, including:
 
 - duplicate `(label, amount)` pairs
 - SST sanity check — flags 8% tax where telco service tax should be 6%

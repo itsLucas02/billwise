@@ -118,7 +118,8 @@ function findAmount(line: string): { value: number; index: number; length: numbe
     // skip dates (01.10.2026), percentages, quantities (2.50GB) and times
     if (/^[.\/:]\d/.test(after) || /^\s?%/.test(after) || /^[A-Za-z]/.test(after) || /[.\/\d]/.test(before)) continue;
     const value = parseFloat(`${m[4].replace(/,/g, "")}.${m[5]}`);
-    const negative = Boolean(m[2] || m[3] || (m[1] && m[6]) || m[7]);
+    const dashColumn = Boolean(m[2]) && /^-\s/.test(m[0].trimStart()); // "- - 273.40": empty columns, not a minus sign
+    const negative = Boolean((m[2] && !dashColumn) || m[3] || (m[1] && m[6]) || m[7]);
     found = { value: negative ? -value : value, index: m.index, length: m[0].length };
   }
   return found;
@@ -126,6 +127,7 @@ function findAmount(line: string): { value: number; index: number; length: numbe
 
 function cleanLabel(s: string): string {
   return s
+    .replace(/(\s+(?:-?(?:RM\s?)?[\d,]+\.\d{2}|\d{1,2}\/\d{1,2}\/\d{2,4}|-))+\s*$/i, "")
     .replace(/\b(RM|MYR)\s*$/i, "")
     .replace(/[\s:|·•\-–—_.=]+$/g, "")
     .replace(/^[\s:|·•\-–—_.*=]+/g, "")
@@ -133,10 +135,13 @@ function cleanLabel(s: string): string {
     .trim();
 }
 
-type AccountKind = "current" | "due" | "previous" | "payment" | "subtotal" | "total";
+type AccountKind = "current" | "due" | "previous" | "payment" | "subtotal" | "total" | "ignore" | "summary";
 const ACCOUNT_RULES: [AccountKind, RegExp][] = [
-  ["current", /total current charges|current charges|caj semasa|charges for this (month|bill)|jumlah caj/i],
-  ["due", /amount due|total due|total payable|jumlah (perlu dibayar|tertunggak)|please pay/i],
+  // Full statements (e.g. uploaded PDFs) carry overview and category-summary rows that repeat the detailed charges.
+  ["ignore", /^bill overview|credit limit|^deposit\b|remaining balance|total before tax/i],
+  ["summary", /^(monthly|usage|other|one[- ]?time|recurring|discount)s? charges?$|^adjustments?$/i],
+  ["current", /total current charges|current charges|caj semasa|charges for this (month|bill)|this month\W{0,3}s charges|jumlah caj/i],
+  ["due", /amount due|total due|total (amount )?payable|jumlah (perlu dibayar|tertunggak)|please pay/i],
   ["previous", /previous (balance|bill)|balance (brought|b\/f)|\bbaki\b|outstanding (balance|amount)|opening balance/i],
   ["payment", /payments? (received|thank)|thank you for your payment|bayaran diterima|^payment\b/i],
   ["subtotal", /sub\s*-?\s*total/i],
@@ -261,6 +266,7 @@ export function decodeBill(input: DecodeInput): Analysis {
   let statedDue: number | undefined;
   let statedTotal: number | undefined;
   let paid = 0;
+  const summaryRows: { label: string; amount: number }[] = [];
 
   for (const line of lines) {
     const amt = findAmount(line);
@@ -269,20 +275,35 @@ export function decodeBill(input: DecodeInput): Analysis {
     if (!label || !/[a-z]/i.test(label)) continue;
     const acct = accountKind(label);
     if (acct) {
-      if (acct === "current") statedCurrent = amt.value;
+      if (acct === "current") statedCurrent = Math.max(statedCurrent ?? amt.value, amt.value); // statements list it before and after tax: keep the with-tax figure
       else if (acct === "due") statedDue = amt.value;
       else if (acct === "previous") meta.previousBalance = amt.value;
       else if (acct === "payment") paid = round2(paid + Math.abs(amt.value));
+      else if (acct === "summary") summaryRows.push({ label, amount: amt.value });
       else if (acct === "total" && statedTotal === undefined) statedTotal = amt.value;
       notCounted.push({ label, amount: amt.value });
       continue;
     }
     if (/^(bill|statement|invoice)\s*date|due date|account/i.test(label)) continue;
+    if (label.split(/\s+/).length > 12) continue; // small print that merely mentions an amount
     let category = categorize(label);
+    // a statement often shows the same service tax twice (overview + tax summary)
+    if (category === "tax" && (amt.value === 0 || items.some((i) => i.category === "tax" && Math.abs(i.amount - amt.value) < 0.005))) {
+      notCounted.push({ label, amount: amt.value });
+      continue;
+    }
     let amount = amt.value;
     if (category === "rebate" && amount > 0) amount = -amount;
     if (amount < 0 && category !== "tax" && category !== "rounding") category = "rebate";
     items.push({ id: `i${items.length + 1}`, label: label.slice(0, 120), amount: round2(amount), category, explanation: "" });
+  }
+
+  // Some statements only put amounts on the category summary; use it when no detailed charge carries an amount.
+  if (summaryRows.length && !items.some((i) => i.amount !== 0 && i.category !== "tax" && i.category !== "rounding")) {
+    for (const r of summaryRows) {
+      if (r.amount === 0) continue;
+      items.push({ id: `i${items.length + 1}`, label: r.label, amount: round2(r.amount), category: r.amount < 0 ? "rebate" : categorize(r.label), explanation: "" });
+    }
   }
 
   const by = (c: Category) => items.filter((i) => i.category === c);
@@ -401,9 +422,11 @@ export function decodeBill(input: DecodeInput): Analysis {
   const computed = round2(items.reduce((s, i) => s + i.amount, 0));
   const compareTo = statedCurrent ?? (meta.previousBalance === undefined ? statedDue ?? statedTotal : undefined);
   if (compareTo !== undefined) {
-    meta.statedTotal = compareTo;
     const diff = round2(compareTo - computed);
-    if (Math.abs(diff) > 0.5) {
+    const preTax = round2(computed - totalOf("tax") - totalOf("rounding"));
+    const statedPreTax = Math.abs(diff) > 0.5 && Math.abs(compareTo - preTax) <= 0.5;
+    if (!statedPreTax) meta.statedTotal = compareTo; // a pre-tax figure isn't "what the bill states" as a total
+    if (Math.abs(diff) > 0.5 && !statedPreTax) {
       add({
         severity: "medium",
         title: "The bill's total doesn't match its charges",

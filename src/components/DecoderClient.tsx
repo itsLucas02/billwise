@@ -2,7 +2,8 @@
 
 import Link from "next/link";
 import { useCallback, useEffect, useRef, useState } from "react";
-import { BookOpen, ChevronDown, ClipboardPaste, FileText, History, ListPlus, LoaderCircle, Plus, ScanText, Trash2, Wand2 } from "lucide-react";
+import { BookOpen, ChevronDown, ClipboardPaste, FileText, FileUp, History, ListPlus, LoaderCircle, Plus, ScanText, Trash2, Wand2 } from "lucide-react";
+import { linesFromPdfItems, type PdfTextItem } from "@/lib/pdfText";
 import { api } from "@/lib/client";
 import type { Analysis } from "@/lib/decoder";
 import { rm, relativeTime, toNum } from "@/lib/format";
@@ -31,6 +32,8 @@ const QUICK_ROWS = ["Monthly plan fee", "Service Tax 6%", "Late payment charge",
 export function DecoderClient({ initialSample }: { initialSample?: string }) {
   const [mode, setMode] = useState<Mode>(initialSample ? "sample" : "paste");
   const [text, setText] = useState("");
+  const [pdfNote, setPdfNote] = useState("");
+  const pdfInput = useRef<HTMLInputElement>(null);
   const [rows, setRows] = useState<Row[]>([
     { id: 1, label: "Monthly plan fee", amount: "" },
     { id: 2, label: "Service Tax 6%", amount: "" },
@@ -107,6 +110,39 @@ export function DecoderClient({ initialSample }: { initialSample?: string }) {
     analyse({ text: body, provider, promisedPrice: toNum(promised), usualAmount: toNum(usual), source: mode === "manual" ? "manual" : "paste" }, "main");
   }
 
+  async function readPdf(e: React.ChangeEvent<HTMLInputElement>) {
+    const file = e.target.files?.[0];
+    e.target.value = "";
+    if (!file) return;
+    setError("");
+    setPdfNote("");
+    if (file.type !== "application/pdf" && !/\.pdf$/i.test(file.name)) return setError("That file isn't a PDF. Choose your e-bill PDF, or paste the charges instead.");
+    if (file.size > 15 * 1024 * 1024) return setError("That PDF is larger than 15 MB. Try the e-bill from your provider's app or email.");
+    setBusy("pdf");
+    try {
+      // Read in the browser: the PDF itself never leaves the device.
+      const pdfjs = await import("pdfjs-dist");
+      pdfjs.GlobalWorkerOptions.workerSrc = new URL("pdfjs-dist/build/pdf.worker.min.mjs", import.meta.url).toString();
+      const doc = await pdfjs.getDocument({ data: new Uint8Array(await file.arrayBuffer()) }).promise;
+      const pages: PdfTextItem[][] = [];
+      for (let i = 1; i <= doc.numPages; i++) {
+        const content = await (await doc.getPage(i)).getTextContent();
+        pages.push(content.items.flatMap((it) => ("str" in it ? [{ str: it.str, transform: it.transform }] : [])));
+      }
+      const extracted = linesFromPdfItems(pages);
+      if (!/\d\.\d{2}\b/.test(extracted)) {
+        setError("We couldn't find any text in that PDF. It may be a scan or photo — copy the charges in by hand instead.");
+        return;
+      }
+      setText(extracted);
+      setPdfNote(`Read ${doc.numPages} page${doc.numPages === 1 ? "" : "s"} from ${file.name}. Check the text below — you can delete your name and address — then decode.`);
+    } catch {
+      setError("We couldn't read that PDF. If it's password-protected, open it and copy the charges in instead.");
+    } finally {
+      setBusy(null);
+    }
+  }
+
   async function pasteClipboard() {
     try {
       const t = await navigator.clipboard.readText();
@@ -148,7 +184,7 @@ export function DecoderClient({ initialSample }: { initialSample?: string }) {
             {mode === "paste" && (
               <div>
                 <label htmlFor="bill-text" className="font-display text-lg font-bold">Paste the charges from your bill</label>
-                <p className="mt-1 text-muted">Open your e-bill (PDF or app), select the charges, copy, and paste here. You don&apos;t need to include your name or address.</p>
+                <p className="mt-1 text-muted">Upload your e-bill PDF, or copy the charges from it (or your provider&apos;s app) and paste them here. The PDF is read on your device and never uploaded.</p>
                 <textarea
                   id="bill-text"
                   value={text}
@@ -158,9 +194,14 @@ export function DecoderClient({ initialSample }: { initialSample?: string }) {
                   placeholder={"For example:\nUnifi Home 300Mbps Monthly Fee     139.00\nLate Payment Charge                 10.00\nService Tax 6%                      8.94\nTotal Current Charges              157.94"}
                   className="field mt-4 font-mono text-[0.95rem] leading-relaxed"
                 />
+                {pdfNote && <p role="status" className="mt-3 rounded-xl bg-sky-soft px-3 py-2 text-sm font-semibold">{pdfNote}</p>}
                 <div className="mt-3 flex flex-wrap gap-2">
+                  <input ref={pdfInput} type="file" accept="application/pdf,.pdf" className="sr-only" tabIndex={-1} aria-hidden onChange={readPdf} />
+                  <button type="button" onClick={() => pdfInput.current?.click()} disabled={busy === "pdf"} className={cn(btn.secondary, btnSm)}>
+                    {busy === "pdf" ? <LoaderCircle className="h-4 w-4 animate-spin" /> : <FileUp className="h-4 w-4" />} Upload PDF bill
+                  </button>
                   <button type="button" onClick={pasteClipboard} className={cn(btn.secondary, btnSm)}><ClipboardPaste className="h-4 w-4" /> Paste from clipboard</button>
-                  {text && <button type="button" onClick={() => setText("")} className={cn(btn.ghost, btnSm)}><Trash2 className="h-4 w-4" /> Clear</button>}
+                  {text && <button type="button" onClick={() => { setText(""); setPdfNote(""); }} className={cn(btn.ghost, btnSm)}><Trash2 className="h-4 w-4" /> Clear</button>}
                 </div>
               </div>
             )}
