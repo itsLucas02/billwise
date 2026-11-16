@@ -52,7 +52,7 @@ export default async function ComparePage({ searchParams }: { searchParams: Prom
     { label: "Contract", value: (p) => `${contractLabel(p)}${p.contractNote ? ` — ${p.contractNote}` : ""}` },
     { label: "Perks", value: (p) => p.perks.join(" · ") || "—" },
     { label: "24-month cost (incl. SST)", value: (p) => rmShort(Math.round(withSST(p.price) * 24)), best: lowest((p) => p.price) },
-    { label: "Source", value: (p) => (p.status === "official" ? "Provider's site" : "Authorised listings") },
+    { label: "Source", value: (p) => (p.status === "official" ? "Simulated provider listing" : "Simulated partner listing") },
   ];
 
   return (
@@ -75,7 +75,7 @@ export default async function ComparePage({ searchParams }: { searchParams: Prom
                   <th key={p.id} scope="col" className="p-4 align-top">
                     <ProviderBadge id={p.provider} size="sm" />
                     <p className="mt-2 font-display text-lg font-bold leading-tight">{p.name}</p>
-                    <a href={p.source} target="_blank" rel="noreferrer" className="mt-1 inline-flex items-center gap-1 text-sm font-semibold text-pandan-dark hover:underline">Official / source page <ExternalLink className="h-3.5 w-3.5" /></a>
+                    <a href={p.source} target="_blank" rel="noreferrer" className="mt-1 inline-flex items-center gap-1 text-sm font-semibold text-pandan-dark hover:underline">Simulated source <ExternalLink className="h-3.5 w-3.5" /></a>
                   </th>
                 ))}
               </tr>

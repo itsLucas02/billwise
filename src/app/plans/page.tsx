@@ -24,7 +24,7 @@ export default async function PlansPage({ searchParams }: { searchParams: Promis
       <PageHeader
         eyebrow="Plan Finder · Cari pelan terbaik"
         title={<>Find a plan that fits your <span className="mark">home</span> and your budget</>}
-        intro={`Answer a few simple questions and we'll rank ${PLANS.length} real fibre and mobile plans from Unifi, Maxis, CelcomDigi, TIME, Allo and U Mobile — with honest reasons for each.`}
+        intro={`Answer a few simple questions and we'll rank ${PLANS.length} example fibre and mobile plans from Unifly, Maxon, TelcomDigi, TIDE, Helo Fibre and V Mobile — with honest reasons for each. All providers here are fictional.`}
       />
       <PlanFinder initial={initial} />
     </>

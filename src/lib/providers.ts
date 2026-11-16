@@ -1,6 +1,6 @@
-export type ProviderId = "unifi" | "maxis" | "celcomdigi" | "time" | "allo" | "umobile";
+export type ProviderId = "unifly" | "maxon" | "telcomdigi" | "tide" | "helo" | "vmobile";
 
-export const PROVIDER_IDS: ProviderId[] = ["unifi", "maxis", "celcomdigi", "time", "allo", "umobile"];
+export const PROVIDER_IDS: ProviderId[] = ["unifly", "maxon", "telcomdigi", "tide", "helo", "vmobile"];
 
 export type ChannelKind = "phone" | "whatsapp" | "chat" | "web" | "email";
 
@@ -32,149 +32,149 @@ export interface Provider {
 }
 
 export const PROVIDERS: Record<ProviderId, Provider> = {
-  unifi: {
-    id: "unifi",
-    name: "Unifi",
-    company: "Telekom Malaysia (TM)",
-    color: "#F26B1D",
+  unifly: {
+    id: "unifly",
+    name: "Unifly",
+    company: "Unifly Networks Sdn Bhd",
+    color: "#0F766E",
     ink: "#ffffff",
     services: ["fibre", "mobile"],
-    blurb: "TM's consumer brand for Unifi Home fibre and Unifi Mobile (UNI5G) plans.",
+    blurb: "Fibre and mobile plans on a national fixed network.",
     fibreNetwork:
-      "Runs on TM's own fixed network — the widest fibre footprint in Malaysia, though not every street or building is connected.",
-    website: "https://unifi.com.my",
-    supportUrl: "https://unifi.com.my/support/contact-us",
-    fibreCheckUrl: "https://unifi.com.my",
-    mobileMapUrl: "https://unifi.com.my",
-    app: "MyUnifi app",
+      "Runs its own fixed network with broad fibre coverage, though not every street or building is connected.",
+    website: "https://example.com/unifly",
+    supportUrl: "https://example.com/unifly/support",
+    fibreCheckUrl: "https://example.com/unifly/coverage",
+    mobileMapUrl: "https://example.com/unifly/mobile-coverage",
+    app: "MyUnifly app",
     channels: [
-      { kind: "phone", label: "Hotline", value: "100", href: "tel:100", note: "From local lines" },
-      { kind: "phone", label: "From overseas", value: "+603-2241 1290", href: "tel:+60322411290" },
-      { kind: "chat", label: "Live chat", value: "unifi.com.my / MyUnifi app", href: "https://unifi.com.my/support/contact-us" },
+      { kind: "phone", label: "Hotline", value: "1-300-88-0100", href: "tel:1300880100", note: "Simulated" },
+      { kind: "chat", label: "Live chat", value: "example.com/unifly/support", href: "https://example.com/unifly/support", note: "Simulated" },
     ],
     tips: [
-      "You can view bills and raise billing enquiries in the MyUnifi app.",
+      "You can view bills and raise billing enquiries in the MyUnifly app.",
       "If your promotional price has ended, ask whether you qualify for a current promotion or recontract offer.",
     ],
-    detect: /unifi|telekom malaysia|tm technology services|uni5g/i,
+    detect: /unifly|unifly networks/i,
   },
-  maxis: {
-    id: "maxis",
-    name: "Maxis",
-    company: "Maxis Broadband Sdn Bhd",
-    color: "#1C9A55",
+  maxon: {
+    id: "maxon",
+    name: "Maxon",
+    company: "Maxon Telecommunications Sdn Bhd",
+    color: "#3730A3",
     ink: "#ffffff",
     services: ["fibre", "mobile"],
-    blurb: "Mobile postpaid (Maxis, Hotlink) and Maxis Home Fibre, with bundle discounts for customers who have both.",
+    blurb: "Mobile postpaid and home fibre, with bundle discounts for customers who take both.",
     fibreNetwork:
-      "Maxis Home Fibre is delivered over partner fibre infrastructure, so availability depends on which network reaches your building.",
-    website: "https://www.maxis.com.my",
-    supportUrl: "https://www.maxis.com.my",
-    fibreCheckUrl: "https://www.maxis.com.my",
-    mobileMapUrl: "https://www.maxis.com.my",
-    app: "Maxis app",
+      "Maxon Home Fibre is delivered over partner fibre infrastructure, so availability depends on which network reaches your building.",
+    website: "https://example.com/maxon",
+    supportUrl: "https://example.com/maxon/support",
+    fibreCheckUrl: "https://example.com/maxon/coverage",
+    mobileMapUrl: "https://example.com/maxon/mobile-coverage",
+    app: "Maxon app",
     channels: [
-      { kind: "phone", label: "From a Maxis line", value: "123", href: "tel:123" },
-      { kind: "phone", label: "From other lines", value: "1300-820-120", href: "tel:1300820120" },
-      { kind: "whatsapp", label: "WhatsApp", value: "+6012-345 1123", href: "https://wa.me/60123451123" },
+      { kind: "phone", label: "Customer service", value: "1-300-88-0200", href: "tel:1300880200", note: "Simulated" },
+      { kind: "whatsapp", label: "WhatsApp", value: "+60 12-000 0200", href: "https://example.com/maxon/whatsapp", note: "Simulated" },
     ],
     tips: [
-      "Maxis Postpaid customers get lower Home Fibre bundle prices — worth asking if you pay for both separately.",
-      "Roaming passes and content add-ons can be managed in the Maxis app.",
+      "Customers who take both postpaid and home fibre may get a lower bundle price — worth asking if you pay for both separately.",
+      "Roaming passes and content add-ons can be managed in the Maxon app.",
     ],
-    detect: /maxis|hotlink/i,
+    detect: /maxon/i,
   },
-  celcomdigi: {
-    id: "celcomdigi",
-    name: "CelcomDigi",
-    company: "CelcomDigi Berhad",
-    color: "#2F5BEA",
+  telcomdigi: {
+    id: "telcomdigi",
+    name: "TelcomDigi",
+    company: "TelcomDigi Berhad",
+    color: "#9F1239",
     ink: "#ffffff",
     services: ["fibre", "mobile"],
-    blurb: "Malaysia's largest mobile operator (formed from Celcom and Digi), plus CelcomDigi Home Fibre.",
+    blurb: "A large mobile operator with postpaid plans and home fibre on partner infrastructure.",
     fibreNetwork:
-      "CelcomDigi Home Fibre is delivered over partner fibre infrastructure — availability depends on your exact address.",
-    website: "https://www.celcomdigi.com",
-    supportUrl: "https://help.celcomdigi.com",
-    fibreCheckUrl: "https://www.celcomdigi.com",
-    mobileMapUrl: "https://www.celcomdigi.com",
-    app: "CelcomDigi app",
+      "TelcomDigi Home Fibre is delivered over partner fibre infrastructure — availability depends on your exact address.",
+    website: "https://example.com/telcomdigi",
+    supportUrl: "https://example.com/telcomdigi/support",
+    fibreCheckUrl: "https://example.com/telcomdigi/coverage",
+    mobileMapUrl: "https://example.com/telcomdigi/mobile-coverage",
+    app: "TelcomDigi app",
     channels: [
-      { kind: "phone", label: "Customer service", value: "016-333 1111", href: "tel:+60163331111" },
-      { kind: "whatsapp", label: "WhatsApp", value: "016-333 1111", href: "https://wa.me/60163331111", note: "8am–8pm" },
-      { kind: "web", label: "Help centre", value: "help.celcomdigi.com", href: "https://help.celcomdigi.com" },
+      { kind: "phone", label: "Customer service", value: "1-300-88-0300", href: "tel:1300880300", note: "Simulated" },
+      { kind: "web", label: "Help centre", value: "example.com/telcomdigi/support", href: "https://example.com/telcomdigi/support", note: "Simulated" },
     ],
     tips: [
-      "Postpaid 5G 140 and above give 50% off supplementary lines — handy for families.",
-      "Eligible postpaid customers can get Home Fibre at bundle prices.",
+      "Higher-tier postpaid plans may discount supplementary lines — handy for families.",
+      "Eligible postpaid customers may get home fibre at bundle prices.",
     ],
-    detect: /celcomdigi|celcom|\bdigi\b|xpax/i,
+    detect: /telcomdigi|telcom digi/i,
   },
-  time: {
-    id: "time",
-    name: "TIME",
-    company: "TIME dotCom Berhad",
-    color: "#25267A",
+  tide: {
+    id: "tide",
+    name: "TIDE",
+    company: "TIDE Broadband Sdn Bhd",
+    color: "#334155",
     ink: "#ffffff",
     services: ["fibre"],
     blurb: "Fibre specialist known for high speeds and symmetrical upload on its own network.",
     fibreNetwork:
       "Runs its own fibre network, concentrated in high-rise buildings and selected landed areas in major cities.",
-    website: "https://www.time.com.my",
-    supportUrl: "https://www.time.com.my",
-    fibreCheckUrl: "https://www.time.com.my",
-    app: "TIME self-care (web & app)",
-    channels: [{ kind: "phone", label: "Hotline", value: "1800-18-1818", href: "tel:1800181818" }],
+    website: "https://example.com/tide",
+    supportUrl: "https://example.com/tide/support",
+    fibreCheckUrl: "https://example.com/tide/coverage",
+    app: "TIDE self-care (web & app)",
+    channels: [
+      { kind: "phone", label: "Hotline", value: "1-300-88-0400", href: "tel:1300880400", note: "Simulated" },
+    ],
     tips: [
-      "TIME advertises prices excluding 6% SST — expect the tax on top of your plan price.",
+      "Prices are usually advertised before 6% SST — expect the tax on top of your plan price.",
       "No-contract options carry a one-time installation and activation charge.",
     ],
-    detect: /time dotcom|time internet|time fibre|time\.com\.my|masa internet/i,
+    detect: /tide broadband|tide fibre|tide internet/i,
   },
-  allo: {
-    id: "allo",
-    name: "Allo",
-    company: "Allo Technology Sdn Bhd (TNB group)",
-    color: "#7A3FE4",
+  helo: {
+    id: "helo",
+    name: "Helo Fibre",
+    company: "Helo Fibre Sdn Bhd",
+    color: "#92400E",
     ink: "#ffffff",
     services: ["fibre"],
-    blurb: "TNB-owned fibre provider with symmetrical speeds on most plans.",
+    blurb: "Fibre provider with symmetrical speeds on most plans.",
     fibreNetwork: "Operates its own fibre network in selected neighbourhoods across several states.",
-    website: "https://www.allo.my",
-    supportUrl: "https://www.allo.my",
-    fibreCheckUrl: "https://www.allo.my",
-    app: "Allo website",
-    channels: [{ kind: "web", label: "Contact via website", value: "allo.my", href: "https://www.allo.my" }],
+    website: "https://example.com/helo-fibre",
+    supportUrl: "https://example.com/helo-fibre/support",
+    fibreCheckUrl: "https://example.com/helo-fibre/coverage",
+    app: "Helo Fibre website",
+    channels: [
+      { kind: "web", label: "Contact via website", value: "example.com/helo-fibre", href: "https://example.com/helo-fibre/support", note: "Simulated" },
+    ],
     tips: [
-      "Allo prices are subject to 6% service tax.",
+      "Prices are subject to 6% service tax.",
       "12-month contracts carry a one-time charge; 24-month contracts don't.",
     ],
-    detect: /\ballo\b/i,
+    detect: /\bhelo\b/i,
   },
-  umobile: {
-    id: "umobile",
-    name: "U Mobile",
-    company: "U Mobile Sdn Bhd",
-    color: "#F5A300",
-    ink: "#1f1600",
+  vmobile: {
+    id: "vmobile",
+    name: "V Mobile",
+    company: "V Mobile Sdn Bhd",
+    color: "#6D28D9",
+    ink: "#ffffff",
     services: ["fibre", "mobile"],
-    blurb: "ULTRA postpaid plans with large data quotas, plus U Home Fibre.",
-    fibreNetwork: "U Home Fibre is delivered over partner fibre networks — check your exact address.",
-    website: "https://www.u.com.my",
-    supportUrl: "https://www.u.com.my/en/personal/support",
-    fibreCheckUrl: "https://www.u.com.my/en/personal/broadband/fibre/check-coverage.html",
-    mobileMapUrl: "https://www.u.com.my",
-    app: "MyUMobile app",
+    blurb: "Postpaid plans with large data quotas, plus V Home Fibre.",
+    fibreNetwork: "V Home Fibre is delivered over partner fibre networks — check your exact address.",
+    website: "https://example.com/v-mobile",
+    supportUrl: "https://example.com/v-mobile/support",
+    fibreCheckUrl: "https://example.com/v-mobile/coverage",
+    mobileMapUrl: "https://example.com/v-mobile/mobile-coverage",
+    app: "MyVMobile app",
     channels: [
-      { kind: "phone", label: "From a U Mobile line", value: "1318", href: "tel:1318" },
-      { kind: "phone", label: "From other lines", value: "+6018-388 1318", href: "tel:+60183881318" },
-      { kind: "email", label: "Email", value: "customer.service@u.com.my", href: "mailto:customer.service@u.com.my" },
+      { kind: "phone", label: "Customer service", value: "1-300-88-0600", href: "tel:1300880600", note: "Simulated" },
+      { kind: "email", label: "Email", value: "support@vmobile.example", href: "mailto:support@vmobile.example", note: "Simulated" },
     ],
     tips: [
-      "ULTRA plans slow to 512kbps after your quota instead of charging for extra data.",
-      "A 90-day minimum applies before you can downgrade a postpaid plan.",
+      "Plans may slow to 512kbps after your quota instead of charging for extra data.",
+      "A minimum period may apply before you can downgrade a postpaid plan.",
     ],
-    detect: /u mobile|umobile|u\.com\.my|ultra postpaid/i,
+    detect: /v mobile|vmobile/i,
   },
 };
 
@@ -187,12 +187,15 @@ export function primaryContact(id: ProviderId): SupportChannel | undefined {
 }
 
 export function detectProvider(text: string): ProviderId | null {
-  const order: ProviderId[] = ["celcomdigi", "maxis", "umobile", "unifi", "time", "allo"];
+  const order: ProviderId[] = ["telcomdigi", "maxon", "vmobile", "unifly", "tide", "helo"];
   for (const id of order) if (PROVIDERS[id].detect.test(text)) return id;
   return null;
 }
 
-/** Official escalation path for unresolved telco complaints in Malaysia. */
+/**
+ * Real escalation path for unresolved telco complaints in Malaysia. These are
+ * genuine regulator details, not part of the fictional provider simulation.
+ */
 export const ESCALATION = {
   cfm: {
     name: "Communications & Multimedia Consumer Forum of Malaysia (CFM)",

@@ -15,7 +15,7 @@ export default function ProvidersPage() {
       <PageHeader
         eyebrow="Provider directory · Direktori penyedia"
         title={<>Who to contact, and <span className="mark">how</span></>}
-        intro="Official customer service channels, self-service apps and coverage checkers for Malaysia's main telco providers — in one place."
+        intro="Customer service channels, self-service apps and coverage checkers for six fictional providers — every name, number and offer on this page is simulated for demonstration."
       />
       <div className="mx-auto max-w-6xl px-4 py-8">
         <div className="grid gap-6 md:grid-cols-2">
@@ -55,8 +55,8 @@ export default function ProvidersPage() {
                   {p.tips.map((t) => <li key={t}>💡 {t}</li>)}
                 </ul>
                 <div className="mt-auto flex flex-wrap gap-2 pt-5">
-                  <a href={p.website} target="_blank" rel="noreferrer" className={cn(btn.secondary, btnSm)}>Website <ExternalLink className="h-4 w-4" /></a>
-                  <a href={p.fibreCheckUrl} target="_blank" rel="noreferrer" className={cn(btn.ghost, btnSm)}><RadioTower className="h-4 w-4" /> Coverage checker</a>
+                  <a href={p.website} target="_blank" rel="noreferrer" className={cn(btn.secondary, btnSm)}>Simulated site <ExternalLink className="h-4 w-4" /></a>
+                  <a href={p.fibreCheckUrl} target="_blank" rel="noreferrer" className={cn(btn.ghost, btnSm)}><RadioTower className="h-4 w-4" /> Simulated checker</a>
                   <Link href={`/plans?tab=browse`} className={cn(btn.ghost, btnSm)}><Sparkles className="h-4 w-4" /> Plans</Link>
                   <Link href={`/help/new?provider=${id}`} className={cn(btn.ghost, btnSm)}><LifeBuoy className="h-4 w-4" /> Start a case</Link>
                 </div>
@@ -77,7 +77,7 @@ export default function ProvidersPage() {
             <a href={`tel:${ESCALATION.mcmc.hotline.replace(/-/g, "")}`} className={btn.secondary}><Phone className="h-4 w-4" /> MCMC {ESCALATION.mcmc.hotline}</a>
           </div>
         </Card>
-        <p className="mt-6 text-sm text-muted">Contact details are compiled from providers&apos; public channels and may change. If a number doesn&apos;t connect, use the contact page on the provider&apos;s website.</p>
+        <p className="mt-6 text-sm text-muted">All six providers, their contact details and their offers are fictional and shown for demonstration only; links point to the reserved example.com domain. The CFM and MCMC escalation details on this page are real public information.</p>
       </div>
     </>
   );

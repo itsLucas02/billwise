@@ -137,7 +137,7 @@ export function HelpCenter() {
           })}
         </div>
       </section>
-      <p className="flex items-center gap-2 text-sm text-muted"><HandCoins className="h-4 w-4" /> Contact details are compiled from providers&apos; public channels — check the provider&apos;s website if a number doesn&apos;t connect.</p>
+      <p className="flex items-center gap-2 text-sm text-muted"><HandCoins className="h-4 w-4" /> Provider names and contact details are fictional and shown for demonstration only. The CFM and MCMC details on this page are real.</p>
     </div>
   );
 }

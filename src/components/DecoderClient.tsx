@@ -155,7 +155,7 @@ export function DecoderClient({ initialSample }: { initialSample?: string }) {
                   onChange={(e) => setText(e.target.value)}
                   rows={11}
                   spellCheck={false}
-                  placeholder={"For example:\nUnifi Home 300Mbps Monthly Fee     139.00\nLate Payment Charge                 10.00\nService Tax 6%                      8.94\nTotal Current Charges              157.94"}
+                  placeholder={"For example:\nUnifly Home 300Mbps Monthly Fee     139.00\nLate Payment Charge                 10.00\nService Tax 6%                      8.94\nTotal Current Charges              157.94"}
                   className="field mt-4 font-mono text-[0.95rem] leading-relaxed"
                 />
                 <div className="mt-3 flex flex-wrap gap-2">

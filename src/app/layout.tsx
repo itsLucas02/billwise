@@ -24,7 +24,7 @@ export const metadata: Metadata = {
     template: "%s · BillWise",
   },
   description:
-    "BillWise helps Malaysians decode telco bills, spot overcharges, compare Unifi, Maxis, CelcomDigi, TIME, Allo and U Mobile plans, check coverage the honest way, and resolve billing problems.",
+    "BillWise helps Malaysians decode telco bills, spot overcharges, compare Unifly, Maxon, TelcomDigi, TIDE, Helo Fibre and V Mobile plans, check coverage the honest way, and resolve billing problems.",
 };
 
 export const viewport: Viewport = {

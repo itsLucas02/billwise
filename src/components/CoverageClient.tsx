@@ -281,7 +281,7 @@ export function CoverageClient({ initialCheck }: { initialCheck?: string }) {
                     </>
                   )}
                   <label className="mt-5 block">
-                    <span className="text-sm font-semibold">Notes (e.g. “TIME installed in Block B”, “Unifi said 2–3 weeks”)</span>
+                    <span className="text-sm font-semibold">Notes (e.g. “TIDE installed in Block B”, “Unifly said 2–3 weeks”)</span>
                     <textarea
                       key={selected.id}
                       className="field mt-1"

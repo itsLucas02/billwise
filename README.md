@@ -2,7 +2,9 @@
 
 **Understand your Malaysian telco bill. Pay only for what you actually need.**
 
-BillWise is a bill-decoding and plan-shopping app for Malaysian telco customers. Paste in your Unifi, Maxis, CelcomDigi, TIME, Allo or U Mobile bill and get a line-by-line breakdown with concrete findings — duplicate charges, an 8% SST line where telco tax should be 6%, a rebate that is about to expire, a device instalment running longer than it should. It also compares 46 plans across 6 providers, walks you through coverage checks without guessing, and gives you a workspace to escalate a billing dispute through the right channels.
+BillWise is a bill-decoding and plan-shopping demo for Malaysian telco customers. Paste in a bill from Unifly, Maxon, TelcomDigi, TIDE, Helo Fibre or V Mobile and get a line-by-line breakdown with concrete findings — duplicate charges, an 8% SST line where telco tax should be 6%, a rebate that is about to expire, a device instalment running longer than it should. It also compares 46 plans across the 6 providers, walks you through coverage checks without guessing, and gives you a workspace to escalate a billing dispute through the right channels.
+
+> **All six providers are fictional.** Names, plans, prices, contact details and source links are simulated for demonstration. The only real details in the app are the public CFM and MCMC escalation channels.
 
 No sign-up, no AI, no scraping. Everything is a deterministic rule engine over a hand-maintained plan catalogue.
 
@@ -37,13 +39,13 @@ Analyses are saved per browser and reachable again at `/decoder/[id]`, including
 - **Saved** — a shortlist you keep across visits.
 - **Compare** — `/plans/compare?ids=…` puts up to four plans side by side, including 24-month cost with SST, and highlights the best cell per row.
 
-Each plan carries a `source` URL and a status: `official` (on the provider's own site) or `listing` (authorised third-party listing). Nothing is crawled or refreshed at runtime; `PLANS_REVIEWED` marks the last manual review.
+Each plan carries an illustrative `source` URL on the reserved `example.com` domain and a status marking whether it is a simulated provider listing or a simulated partner listing. Nothing is crawled or refreshed at runtime; `PLANS_REVIEWED` marks the last manual review.
 
 ### Coverage — `/coverage`
 
 Three honest checks, deliberately without guesswork:
 
-- **Fibre** — enter a postcode plus property type, and BillWise gives you each provider's official checker link and lets you record the real result per provider. When at least one says available, those providers pre-fill the plan finder.
+- **Fibre** — enter a postcode plus property type, and BillWise gives you each provider's simulated checker link and lets you record the result per provider. When at least one says available, those providers pre-fill the plan finder.
 - **Signal** — enter an RSRP reading (with optional SINR) and get a plain-language interpretation.
 - **Speed** — compare your measured Mbps against a plan's advertised speed, with the test method recorded (LAN / Wi-Fi near / Wi-Fi far), because that changes the honest verdict.
 
@@ -95,7 +97,7 @@ These are decisions, not gaps:
 
 - **No AI or LLM.** Every explanation, finding, recommendation and message draft comes from rules and templates. That keeps it free, offline-capable, and auditable.
 - **No accounts.** Identity is an anonymous per-browser id (`x-bw-user`, with an httpOnly cookie fallback). There is no sign-up, password, or OAuth.
-- **No live pricing or coverage data.** Plans are hand-maintained with sources; coverage is whatever you record from the official checkers.
+- **No live pricing or coverage data.** Plans are illustrative demo data; coverage is whatever you record from the provider checkers.
 - **No file upload or OCR.** You paste the bill text, or enter rows by hand.
 - **No dark mode, no PWA, no telemetry.**
 
@@ -124,4 +126,4 @@ Simulated sample bills are labelled as such everywhere. Analysis output is frame
 
 ## Data & disclaimers
 
-Plan prices, contracts and perks are maintained by hand, with each entry pointing to its source and marked `official` or `listing`. Coverage results are what you recorded, not what BillWise inferred. Provider details can change — always confirm on the provider's own site before signing anything.
+Provider names, plans, prices and contact details are fictional, and each plan links to an illustrative source on `example.com`. Coverage results are what you recorded, not what BillWise inferred. The CFM and MCMC escalation channels are real public information.
