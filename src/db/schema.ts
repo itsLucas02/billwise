@@ -88,3 +88,15 @@ export const savedPlans = pgTable(
   },
   (t) => [unique("saved_plans_user_plan_unique").on(t.userId, t.planId)],
 );
+
+/** One row per AI call outside a case (e.g. the Plan Finder assistant), for the per-browser daily cap. */
+export const aiUsage = pgTable(
+  "ai_usage",
+  {
+    id: uuid("id").primaryKey().defaultRandom(),
+    userId: text("user_id").notNull(),
+    feature: text("feature").notNull(),
+    createdAt: timestamp("created_at", { withTimezone: true }).notNull().defaultNow(),
+  },
+  (t) => [index("ai_usage_user_idx").on(t.userId, t.createdAt)],
+);

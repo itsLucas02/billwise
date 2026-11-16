@@ -8,7 +8,7 @@ BillWise is a bill-decoding and plan-shopping demo for Malaysian telco customers
 
 > **The providers are real; the bills are not.** Provider names, plan names, prices, contact details and source links come from each telco's own published pages and were last checked by hand in Nov 2026. The six sample bills use invented account numbers and amounts. BillWise is independent and not affiliated with any provider — always confirm prices on the provider's site before switching.
 
-No sign-up, no scraping. Bill analysis, findings and first drafts come from a deterministic rule engine over a hand-maintained plan catalogue. The only AI is an optional rewrite of the enquiry draft (see [ADR 0001](docs/adr/0001-ai-rewrite-only-on-enquiry-drafts.md)).
+No sign-up, no scraping. Bill analysis, findings and first drafts come from a deterministic rule engine over a hand-maintained plan catalogue. AI is optional and only rewords or explains what BillWise already holds: a rewrite of the enquiry draft ([ADR 0001](docs/adr/0001-ai-rewrite-only-on-enquiry-drafts.md)) and a Plan Finder assistant that explains the ranking ([ADR 0002](docs/adr/0002-plan-finder-assistant-explains-ranking-only.md)).
 
 ---
 
@@ -51,6 +51,7 @@ Analyses are saved per browser and reachable again at `/decoder/[id]`, including
 ### Plan finder — `/plans`
 
 - **Recommend** — a transparent weighted heuristic (no ML). You give budget, household size, activities, home type, contract preference, and which providers you have confirmed at your address. It computes a required speed or data allowance, scores every plan, and returns a match ring with up to four reasons and three cautions per plan.
+- **Ask about these matches** — an optional AI assistant under the results. Ask "why is this first?" or "is a cheaper plan enough for three of us working from home?" in English or Bahasa Malaysia. The server re-runs the ranking from your answers and gives the model only that ranking, its reasons and cautions, and the catalogue entries with their sources and the date prices were checked. It explains and asks follow-up questions; it never reorders plans, invents prices or claims coverage, and sends you back to the form when your needs change. 10 questions per browser per day.
 - **Browse all 46** — filter by provider, max price, minimum speed or data; sort by price, speed, or best value.
 - **Saved** — a shortlist you keep across visits.
 - **Compare** — `/plans/compare?ids=…` puts up to four plans side by side, including 24-month cost with SST, and highlights the best cell per row.
@@ -111,7 +112,7 @@ The schema bootstraps itself: `ensureSchema()` in `src/lib/server.ts` runs idemp
 
 These are decisions, not gaps:
 
-- **AI only where it can't invent facts.** Every explanation, finding, recommendation and first draft comes from rules and templates, so they stay auditable. The one AI feature rewrites an existing enquiry draft, grounded on the case record, and the rule-based draft always works without it.
+- **AI only where it can't invent facts.** Every explanation, finding, recommendation and first draft comes from rules and templates, so they stay auditable. The two AI features only reword or explain: the enquiry rewrite is grounded on the case record, and the Plan Finder assistant on the deterministic ranking and catalogue. Everything works without them.
 - **No accounts.** Identity is an anonymous per-browser id (`x-bw-user`, with an httpOnly cookie fallback). There is no sign-up, password, or OAuth.
 - **No live pricing or coverage data.** Plans are hand-checked against the providers' sites on the date in `PLANS_REVIEWED`; coverage is whatever you record from the provider checkers.
 - **No file upload or OCR.** You paste the bill text, or enter rows by hand.

@@ -1,6 +1,6 @@
 # ADR 0001: AI rewrites enquiry drafts only; the rule engine stays the source of truth
 
-- Status: accepted
+- Status: accepted; amended by [ADR 0002](0002-plan-finder-assistant-explains-ranking-only.md), which adds a Plan Finder assistant under the same rule
 - Date: 2026-11-16
 
 ## Context
@@ -9,7 +9,7 @@ BillWise was built for the "Build For Better Connectivity" bounty, which judges 
 
 ## Decision
 
-- AI is used in one place: rewriting the existing enquiry draft on the case page, with three actions: **Make it firmer**, **Make it shorter**, **Add my notes**.
+- AI is used in two places only: rewriting the existing enquiry draft on the case page, with three actions (**Make it firmer**, **Make it shorter**, **Add my notes**), and, per [ADR 0002](0002-plan-finder-assistant-explains-ranking-only.md), the Plan Finder assistant that explains the deterministic ranking. In both, the rule engine stays the source of truth: AI rewords or explains, it never decides.
 - The prompt (`src/lib/ai.ts`) tells the model what BillWise is and who it serves, and forbids adding facts, changing amounts, adding laws beyond GCC clause 7.3, threats, or implying the message was sent. It receives only the case fields, the current draft and, for "Add my notes", the case timeline notes. The account reference is already reduced to its last 4 digits.
 - The call goes from the server route `POST /api/cases/[id]/rewrite` to an OpenAI-compatible LiteLLM endpoint (`LITELLM_BASE_URL`, `LITELLM_API_KEY`, `AI_MODEL`, default `gpt-5.4-mini`). Keys live in Bitwarden (`BILLWISE__LITELLM_*`) and Vercel env, never in the repo.
 - Each browser gets 10 rewrites per rolling 24 hours, counted from `case_events` rows of kind `ai`, which also show in the case timeline.

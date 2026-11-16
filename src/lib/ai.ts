@@ -1,4 +1,6 @@
-// Pure prompt building for the AI enquiry rewrite. No app imports, so `node --test` can run it directly.
+// Pure prompt building for the AI features. Only type imports (erased at runtime), so `node --test` can run it directly.
+import type { Plan } from "./plans";
+import type { Recommendation } from "./recommend";
 
 export type RewriteAction = "firmer" | "shorter" | "notes";
 
@@ -62,4 +64,96 @@ export function cleanRewrite(raw: string, draft: string): string | null {
   if (/^["“][\s\S]*["”]$/.test(t)) t = t.slice(1, -1).trim();
   if (!t || t.length > draft.length * 2 + 1000) return null;
   return t;
+}
+
+// ───────── Plan Finder assistant (ADR 0002) ─────────
+
+export type ChatTurn = { role: "user" | "assistant"; content: string };
+
+/**
+ * Earlier turns come from the browser, so they are untrusted: keep only complete user→assistant
+ * pairs, the last 3 of them, each turn cut to 600 characters.
+ */
+export function trimHistory(raw: unknown): ChatTurn[] {
+  const items = Array.isArray(raw) ? raw : [];
+  const ok = (t: unknown, role: ChatTurn["role"]): t is ChatTurn =>
+    typeof t === "object" && t !== null && (t as ChatTurn).role === role && typeof (t as ChatTurn).content === "string" && (t as ChatTurn).content.trim() !== "";
+  const pairs: ChatTurn[][] = [];
+  for (let i = 0; i < items.length; i++) {
+    if (ok(items[i], "user") && ok(items[i + 1], "assistant")) pairs.push([items[i], items[++i]]);
+  }
+  return pairs.slice(-3).flat().map((t) => ({ role: t.role, content: t.content.trim().slice(0, 600) }));
+}
+
+export interface PlanChatInput {
+  question: string;
+  history: ChatTurn[];
+  /** The Plan Finder answers that produced this ranking, as readable lines. */
+  answers: string[];
+  needSummary: string;
+  /** Already ranked by `recommend()`, best first. */
+  ranked: { rec: Recommendation; plan: Plan; providerName: string }[];
+  reviewed: string;
+}
+
+const PLAN_SYSTEM = `You are the Plan Finder assistant inside BillWise, an independent consumer tool that helps Malaysian telco customers compare home fibre and mobile postpaid plans. BillWise is not affiliated with any provider.
+
+BillWise has already ranked the plans below with deterministic rules from the customer's Plan Finder answers. Your job is to explain that ranking and help the customer decide, in plain words. Rules:
+- Use only the facts in the context below: the customer's answers, the ranked plans, their scores, reasons and cautions, and the catalogue details. Do not mention any plan, price, promotion, speed, data amount, perk or provider that is not in the context. If asked about something that is not there, say BillWise doesn't list it and suggest checking the provider's own site.
+- Do not re-rank, reorder or re-score plans, and do not invent your own score. When you say why a plan is ranked where it is, use its listed reasons and cautions.
+- If the customer describes needs that differ from their answers (a different budget, household size or activity), say which Plan Finder answer to change and to press "Show my best matches" again for an updated ranking. You may point out which listed plans already fit the new need, using only the listed facts.
+- Never say or imply a plan is available at the customer's address. BillWise does not know coverage: point them to the Coverage page and the provider's own coverage checker.
+- Quote prices exactly as listed, as "RMx/month before 6% SST" (in Bahasa Malaysia: "RMx sebulan sebelum SST 6%"), and mention once that prices were checked in the review month given and should be confirmed on the provider's site before switching. Point out promo prices, bundle conditions and contract terms when they matter. A price marked "dealer or press listing" was not seen on the provider's own site; say so if it matters.
+- Be brief: at most about 150 words, short paragraphs or a few bullet points, no tables, no markdown headings. If one more detail would change the advice, end with one short follow-up question.
+- Reply in the language of the customer's latest message: Bahasa Malaysia if they write in Malay, otherwise English.
+- Only offer follow-ups this data can answer.
+- You give general consumer information, not financial advice. Stay friendly and neutral about providers.`;
+
+const money = (n: number) => `RM${n.toFixed(2)}`;
+
+function planLine(rank: number, { rec, plan: p, providerName }: PlanChatInput["ranked"][number]): string {
+  const facts = [
+    `provider ${providerName}`,
+    `you pay ${money(rec.monthly)}/month before SST (${money(rec.monthlyWithSST)} with SST)`,
+    p.listPrice && `normal price ${money(p.listPrice)}`,
+    p.priceNote,
+    p.bundlePrice && `bundle price ${money(p.bundlePrice)}${p.bundleNote ? ` (${p.bundleNote})` : ""}`,
+    p.down && `${p.down}Mbps down${p.up ? ` / ${p.up}Mbps up` : ""}`,
+    p.dataGB && `data ${p.dataGB === "unlimited" ? "unlimited" : `${p.dataGB}GB`}${p.dataNote ? ` (${p.dataNote})` : ""}`,
+    p.hotspot && `hotspot: ${p.hotspot}`,
+    p.calls,
+    p.includedLines && p.includedLines > 1 && `${p.includedLines} lines included`,
+    p.extraLineCost !== undefined && `extra line ${money(p.extraLineCost)}${p.extraLineNote ? ` (${p.extraLineNote})` : ""}`,
+    p.roaming && `roaming: ${p.roaming}`,
+    p.contractMonths > 0 ? `${p.contractMonths}-month contract` : "no contract",
+    p.contractNote,
+    p.router && `router: ${p.router}`,
+    p.perks.length && `perks: ${p.perks.join(", ")}`,
+    p.status === "official" ? "price from the provider's own site" : "price from a dealer or press listing",
+    `source ${p.source}`,
+  ].filter(Boolean).join("; ");
+  const why = [
+    rec.reasons.length && `  Reasons: ${rec.reasons.join("; ")}`,
+    rec.cautions.length && `  Cautions: ${rec.cautions.join("; ")}`,
+  ].filter(Boolean).join("\n");
+  return `#${rank} ${p.name} (${rec.label}, score ${rec.score}/100): ${facts}${why ? `\n${why}` : ""}`;
+}
+
+export function buildPlanChatMessages(input: PlanChatInput): { role: "system" | "user" | "assistant"; content: string }[] {
+  const context = [
+    `Customer's Plan Finder answers:\n${input.answers.map((a) => `- ${a}`).join("\n")}`,
+    `BillWise's summary of their need: ${input.needSummary}`,
+    `Ranked plans, best first (prices checked ${input.reviewed}):\n${input.ranked.map((r, i) => planLine(i + 1, r)).join("\n")}`,
+  ].join("\n\n");
+  return [
+    { role: "system", content: `${PLAN_SYSTEM}\n\nContext:\n${context}` },
+    ...input.history,
+    { role: "user", content: input.question },
+  ];
+}
+
+/** Tidy the assistant's reply; null means "unusable". */
+export function cleanChatReply(raw: string): string | null {
+  const t = raw.trim().replace(/^```[a-z]*\n?/i, "").replace(/\n?```$/, "").trim();
+  return t && t.length <= 3000 ? t : null;
 }

@@ -74,6 +74,13 @@ const DDL = [
     "created_at" timestamp with time zone DEFAULT now() NOT NULL,
     CONSTRAINT "saved_plans_user_plan_unique" UNIQUE("user_id","plan_id")
   )`,
+  `CREATE TABLE IF NOT EXISTS "ai_usage" (
+    "id" uuid PRIMARY KEY DEFAULT gen_random_uuid() NOT NULL,
+    "user_id" text NOT NULL,
+    "feature" text NOT NULL,
+    "created_at" timestamp with time zone DEFAULT now() NOT NULL
+  )`,
+  `CREATE INDEX IF NOT EXISTS "ai_usage_user_idx" ON "ai_usage" USING btree ("user_id","created_at")`,
 ];
 
 const g = globalThis as typeof globalThis & { __billwiseSchema?: Promise<void> };

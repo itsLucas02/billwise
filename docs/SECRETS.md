@@ -71,7 +71,7 @@ printf 'DATABASE_URL=%s\n' "$db_url" > .env
 chmod 600 .env
 ```
 
-The AI rewrite also reads `LITELLM_API_KEY`, `LITELLM_BASE_URL` and `AI_MODEL` (default `gpt-5.4-mini`). They are set in Vercel (production, preview and development) and in local `.env`. Without them the app works and the rewrite buttons show a friendly error.
+The AI rewrite and the Plan Finder assistant also read `LITELLM_API_KEY`, `LITELLM_BASE_URL` and `AI_MODEL` (default `gpt-5.4-mini`). They are set in Vercel (production, preview and development) and in local `.env`. Without them the app works and the rewrite buttons and the plan assistant show a friendly error.
 
 `.env` must keep mode `600`. Never commit it.
 
