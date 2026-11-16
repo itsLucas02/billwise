@@ -46,14 +46,17 @@ function PlanCard({
 }) {
   const price = rec?.monthly ?? plan.price;
   const isBundle = rec && plan.bundlePrice !== undefined && rec.monthly === plan.bundlePrice && plan.bundlePrice !== plan.price;
+  const color = PROVIDERS[plan.provider].color;
   return (
     <article className={cn("relative flex flex-col rounded-3xl border bg-white p-5 shadow-card", rank === 0 ? "border-ink/40 ring-2 ring-kunyit" : "border-line")}>
+      {/* Provider accent: the same flat colour as the provider badge; no logos (bounty rule 6), no gradients. */}
+      <span aria-hidden className="pointer-events-none absolute inset-x-8 top-0 h-1.5 rounded-b-full" style={{ backgroundColor: color }} />
       {rec && (
         <span className={cn("absolute -top-3 left-5 rounded-full px-3 py-0.5 text-sm font-bold", rank === 0 ? "bg-kunyit text-ink" : "bg-ink text-paper")}>
           {rank !== undefined ? `#${rank + 1} · ` : ""}{rec.label}
         </span>
       )}
-      <div className="flex items-start justify-between gap-3 pt-1">
+      <div className="relative flex items-start justify-between gap-3 pt-1">
         <div className="min-w-0">
           <ProviderBadge id={plan.provider} size="sm" />
           <h3 className="mt-2 font-display text-xl font-bold leading-tight">{plan.name}</h3>
@@ -61,17 +64,17 @@ function PlanCard({
         </div>
         {rec && <MatchRing score={rec.score} />}
       </div>
-      <div className="mt-4 flex flex-wrap items-end gap-x-2">
+      <div className="relative mt-4 flex flex-wrap items-end gap-x-2">
         <span className="font-display text-3xl font-bold tracking-tight">{rmShort(price)}</span>
         <span className="pb-1 text-muted">/month</span>
         {plan.listPrice && price < plan.listPrice && <s className="pb-1 text-muted">{rmShort(plan.listPrice)}</s>}
       </div>
-      <p className="text-sm text-muted">
+      <p className="relative text-sm text-muted">
         {rmShort(withSST(price))} incl. 6% SST
         {isBundle ? ` · ${plan.bundleNote}` : plan.priceNote ? ` · ${plan.priceNote}` : ""}
       </p>
 
-      <dl className="mt-4 grid grid-cols-[auto_minmax(0,1fr)] gap-x-4 gap-y-2 border-t border-line pt-4 text-[0.95rem]">
+      <dl className="relative mt-4 grid grid-cols-[auto_minmax(0,1fr)] gap-x-4 gap-y-2 border-t border-line pt-4 text-[0.95rem]">
         {planFacts(plan).map((f) => (
           <div key={f.label} className="contents">
             <dt className="text-sm font-semibold text-muted">{f.label}</dt>
@@ -81,7 +84,7 @@ function PlanCard({
       </dl>
 
       {rec && (rec.reasons.length > 0 || rec.cautions.length > 0) && (
-        <ul className="mt-4 space-y-1.5 border-t border-line pt-4 text-[0.95rem]">
+        <ul className="relative mt-4 space-y-1.5 border-t border-line pt-4 text-[0.95rem]">
           {rec.reasons.map((r) => (
             <li key={r} className="flex gap-2"><Check className="mt-0.5 h-4 w-4 shrink-0 text-pandan" aria-hidden /> <span>{r}</span></li>
           ))}
@@ -91,18 +94,23 @@ function PlanCard({
         </ul>
       )}
 
-      <div className="mt-auto flex flex-wrap gap-2 pt-5">
-        <button type="button" aria-pressed={compared} onClick={onCompare} className={cn(btn.secondary, btnSm, compared && "!border-ink !bg-ink !text-paper")}>
-          <Columns3 className="h-4 w-4" /> {compared ? "Comparing" : "Compare"}
-        </button>
-        <button type="button" aria-pressed={saved} onClick={onSave} className={cn(btn.ghost, btnSm)}>
-          {saved ? <BookmarkCheck className="h-4 w-4 text-pandan" /> : <Bookmark className="h-4 w-4" />} {saved ? "Saved" : "Save"}
-        </button>
-        <a href={plan.source} target="_blank" rel="noreferrer" className={cn(btn.ghost, btnSm)}>
-          Source <ExternalLink className="h-4 w-4" />
-        </a>
+      <div className="relative mt-auto pt-5">
+        <div className="flex gap-2">
+          <button type="button" aria-pressed={compared} onClick={onCompare} className={cn(btn.secondary, btnSm, "flex-1", compared && "!border-ink !bg-ink !text-paper")}>
+            <Columns3 className="h-4 w-4" /> {compared ? "Comparing" : "Compare"}
+          </button>
+          <button type="button" aria-pressed={saved} onClick={onSave} className={cn(btn.ghost, btnSm, "flex-1")}>
+            {saved ? <BookmarkCheck className="h-4 w-4 text-pandan" /> : <Bookmark className="h-4 w-4" />} {saved ? "Saved" : "Save"}
+          </button>
+        </div>
+        <p className="mt-3 flex flex-wrap items-center gap-x-1.5 text-xs text-muted">
+          <a href={plan.source} target="_blank" rel="noreferrer" className="inline-flex items-center gap-1 font-semibold text-ink-soft underline-offset-2 hover:underline">
+            Source <ExternalLink className="h-3 w-3" aria-hidden />
+          </a>
+          <span aria-hidden>·</span>
+          <span>{plan.status === "official" ? "Provider's own plan page" : "Dealer / press listing pending re-check"} · checked {PLANS_REVIEWED}</span>
+        </p>
       </div>
-      <p className="mt-2 text-xs text-muted">{(plan.status === "official" ? "Provider's own plan page" : "Dealer / press listing pending re-check")} · checked {PLANS_REVIEWED}</p>
     </article>
   );
 }
