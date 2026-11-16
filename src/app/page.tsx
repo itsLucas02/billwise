@@ -1,6 +1,6 @@
 import Link from "next/link";
 import {
-  ArrowRight, BadgeCheck, Eye, LifeBuoy, RadioTower, ScanText, ShieldCheck, Sparkles,
+  ArrowRight, BadgeCheck, Eye, LifeBuoy, RadioTower, ScanText, ShieldCheck, Sparkles, ChevronDown,
 } from "lucide-react";
 import { HomeActivity } from "@/components/HomeActivity";
 import { ProviderBadge, SimTag, btn } from "@/components/ui";
@@ -230,7 +230,7 @@ export default function HomePage() {
             <details key={f.q} className="group rounded-2xl border border-line bg-white p-5">
               <summary className="flex items-center justify-between gap-4 font-semibold">
                 {f.q}
-                <span className="rotate-on-open grid h-8 w-8 shrink-0 place-items-center rounded-full bg-cream text-lg transition" aria-hidden>⌄</span>
+                <span className="rotate-on-open grid h-8 w-8 shrink-0 place-items-center rounded-full bg-cream transition" aria-hidden><ChevronDown className="h-5 w-5" /></span>
               </summary>
               <p className="mt-3 leading-relaxed text-muted">{f.a}</p>
             </details>
