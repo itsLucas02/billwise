@@ -26,6 +26,8 @@ export interface Provider {
   fibreCheckUrl: string;
   mobileMapUrl?: string;
   app: string;
+  /** Path under /public to the provider's official logo file, used only as a small identification mark on badges. Unset = name only. */
+  logo?: string;
   channels: SupportChannel[];
   tips: string[];
   detect: RegExp;

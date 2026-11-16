@@ -120,7 +120,7 @@ export function AppShell({ children }: { children: ReactNode }) {
             </div>
             <p className="mt-3 max-w-sm leading-relaxed">
               An independent consumer tool for Malaysian telco customers. Not affiliated with any provider. Guidance only — always confirm
-              details with your provider.
+              details with your provider. Provider names and logos are trademarks of their respective owners, shown only to identify them.
             </p>
           </div>
           <div>

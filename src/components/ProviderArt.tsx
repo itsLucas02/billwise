@@ -1,16 +1,31 @@
-// Abstract line motifs per provider (owner picked the corner placement, 17 Nov 2026; some motifs may be redrawn). Deliberately NOT derived from any logo or
+// Abstract line motifs per provider, shown faintly in the plan card corner (Unifi, Maxis, TIME, Allo and U Mobile redrawn 17 Nov 2026). Deliberately NOT derived from any logo or
 // wordmark (bounty rule 6); each reflects the kind of network instead. Drawn in currentColor, used faintly.
 import type { ProviderId } from "@/lib/providers";
 
 const range = (n: number) => Array.from({ length: n }, (_, i) => i);
-const wave = (y: number, amp: number, len: number, phase = 0) =>
-  `M -10 ${y} ` + range(14).map((i) => `Q ${-10 + i * len + len / 2} ${y + (i % 2 ? -amp : amp) * (phase ? -1 : 1)} ${-10 + (i + 1) * len} ${y}`).join(" ");
+const f = (n: number) => n.toFixed(1);
+const poly = (pts: [number, number][], close = false) => `M ${pts.map(([x, y]) => `${f(x)} ${f(y)}`).join(" L ")}${close ? " Z" : ""}`;
 
 const MOTIFS: Record<ProviderId, () => React.ReactNode> = {
-  // Ripples from a corner: a signal spreading through a neighbourhood.
-  unifi: () => range(9).map((i) => <circle key={i} cx="200" cy="0" r={22 + i * 22} />),
-  // Long diagonal currents.
-  maxis: () => range(10).map((i) => <path key={i} d={`M ${-60 + i * 30} 220 C ${0 + i * 30} 140, ${40 + i * 30} 80, ${120 + i * 30} -20`} />),
+  // Topographic contours: irregular nested rings, like a coverage map of the ground the network covers.
+  unifi: () => (
+    <g strokeWidth="1.05">
+      {range(12).map((k) => {
+        const pts = range(90).map((j): [number, number] => {
+          const t = (j / 90) * Math.PI * 2;
+          const r = (12 + k * 13) * (1 + 0.09 * Math.sin(3 * t + k * 0.55) + 0.05 * Math.sin(5 * t - k * 0.8));
+          return [150 + r * Math.cos(t), 45 + r * 0.85 * Math.sin(t)];
+        });
+        return <path key={k} d={poly(pts, true)} />;
+      })}
+    </g>
+  ),
+  // A flow field: fine lines drifting together, like traffic across a national network.
+  maxis: () => (
+    <g strokeWidth="1">
+      {range(26).map((i) => <path key={i} d={poly(range(45).map((j): [number, number] => { const x = -10 + j * 5; return [x, -40 + i * 9 + 16 * Math.sin(x / 34 + i * 0.22) + x * 0.32]; }))} />)}
+    </g>
+  ),
   // Nodes and links: a mesh network.
   celcomdigi: () => {
     const pts = range(16).map((i) => [20 + (i % 4) * 53 + (Math.floor(i / 4) % 2) * 18, 20 + Math.floor(i / 4) * 53] as const);
@@ -21,21 +36,31 @@ const MOTIFS: Record<ProviderId, () => React.ReactNode> = {
       </>
     );
   },
-  // Mirrored waves: equal speed up and down.
-  time: () => range(5).flatMap((i) => [<path key={`a${i}`} d={wave(40 + i * 30, 12, 30)} />, <path key={`b${i}`} d={wave(40 + i * 30, 12, 30, 1)} />]),
-  // Woven strands: fibre threads crossing.
-  allo: () => (
-    <>
-      {range(7).map((i) => <path key={`h${i}`} d={`M -10 ${20 + i * 28} C 60 ${5 + i * 28}, 140 ${35 + i * 28}, 210 ${20 + i * 28}`} />)}
-      {range(7).map((i) => <path key={`v${i}`} d={`M ${20 + i * 28} -10 C ${35 + i * 28} 60, ${5 + i * 28} 140, ${20 + i * 28} 210`} />)}
-    </>
+  // Moiré interference: two sets of fine circles crossing evenly, for symmetrical upload and download.
+  time: () => (
+    <g strokeWidth="0.85">
+      {range(26).map((k) => <circle key={`a${k}`} cx="40" cy="200" r={6 + k * 8} />)}
+      {range(26).map((k) => <circle key={`b${k}`} cx="200" cy="40" r={6 + k * 8} />)}
+    </g>
   ),
-  // Radiating arcs and a mast: a cell site broadcasting.
+  // A fibre bundle: fine strands converging into a single cable.
+  allo: () => (
+    <g strokeWidth="0.95">
+      {range(24).map((i) => {
+        const y = -10 + i * 9.5;
+        return <path key={i} d={`M -10 ${f(y)} C 70 ${f(y)}, 120 ${f(100 + (y - 100) * 0.18)}, 210 ${f(100 + (y - 100) * 0.04)}`} />;
+      })}
+    </g>
+  ),
+  // A halftone signal: dots that fade with distance from a single point, like reception falling off.
   umobile: () => (
-    <>
-      {range(6).map((i) => <path key={i} d={`M ${150 - (i + 1) * 22} 200 A ${(i + 1) * 22} ${(i + 1) * 22} 0 0 1 ${150 + (i + 1) * 22} 200`} />)}
-      <path d="M 150 200 L 150 120 M 140 140 L 160 140 M 136 160 L 164 160" />
-    </>
+    <g fill="currentColor" stroke="none">
+      {range(15 * 15).map((i) => {
+        const x = 6 + (i % 15) * 14, y = 6 + Math.floor(i / 15) * 14;
+        const r = 3.4 * (1 - Math.hypot(x - 175, y - 175) / 235);
+        return r > 0.35 ? <circle key={i} cx={x} cy={y} r={f(r)} /> : null;
+      })}
+    </g>
   ),
   // A generic city skyline: a network for the whole town (no real buildings traced).
   yes: () => (
@@ -45,7 +70,7 @@ const MOTIFS: Record<ProviderId, () => React.ReactNode> = {
 
 export function ProviderArt({ id, className, style }: { id: ProviderId; className?: string; style?: React.CSSProperties }) {
   return (
-    <svg aria-hidden viewBox="0 0 200 200" preserveAspectRatio="xMidYMid slice" fill="none" stroke="currentColor" strokeWidth="1.4" strokeLinecap="round" className={className} style={style}>
+    <svg aria-hidden viewBox="0 0 200 200" preserveAspectRatio="xMidYMid slice" fill="none" stroke="currentColor" strokeWidth="1.15" strokeLinecap="round" className={className} style={style}>
       {MOTIFS[id]()}
     </svg>
   );

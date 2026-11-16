@@ -78,6 +78,11 @@ A case tracks status (`open → contacted → awaiting → resolved`, plus `esca
 
 A directory of the seven providers with support channels, apps, coverage-checker links, and the CFM and MCMC hotlines.
 
+### Provider logos
+
+Badges can show a provider's official logo as a small identification mark. Put the official file (SVG or PNG from the provider's own site or press kit) in `public/logos/`, e.g. `public/logos/unifi.svg`, then set `logo: "/logos/unifi.svg"` on that provider in `src/lib/providers.ts`. Without a file the badge shows the name only. Logos stay off the card artwork (see `docs/BOUNTY.md`, requirement 6).
+
+
 ---
 
 ## How it is built

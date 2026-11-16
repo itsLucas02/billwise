@@ -56,7 +56,13 @@ export function ProviderBadge({ id, size = "md", className }: { id: ProviderId |
       )}
       style={{ backgroundColor: p.color, color: p.ink }}
     >
-      <span className="h-1.5 w-1.5 rounded-full" style={{ backgroundColor: p.ink, opacity: 0.8 }} aria-hidden />
+      {p.logo ? (
+        // Logo on a small white tile so the provider's own colours stay intact; the name stays as text for screen readers.
+        // eslint-disable-next-line @next/next/no-img-element
+        <img src={p.logo} alt="" aria-hidden className={cn("rounded bg-white object-contain p-px", size === "sm" ? "h-3.5 w-3.5" : "h-4 w-4")} />
+      ) : (
+        <span className="h-1.5 w-1.5 rounded-full" style={{ backgroundColor: p.ink, opacity: 0.8 }} aria-hidden />
+      )}
       {p.name}
     </span>
   );
