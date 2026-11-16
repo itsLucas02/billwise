@@ -21,6 +21,12 @@ npm run dev
 
 `src/db/index.ts` throws if `DATABASE_URL` is missing. The schema bootstraps itself through `ensureSchema()` in `src/lib/server.ts`, so no migration step is required for a fresh database.
 
+## Deployment
+
+Production: **https://billwise-blush.vercel.app** — Vercel project `billwise` under the `dreamin-x` team (account `adreamin96-6176`). Serverless functions run in **`sin1` (Singapore)**, matching the Supabase region.
+
+`DATABASE_URL` is set as an encrypted Vercel environment variable for production, preview and development, sourced from `BILLWISE__DATABASE_URL_SESSION` in Bitwarden. Deploy with `vercel deploy --prod` from the repo root; `.vercel/` is gitignored and per-deployment URLs are behind Vercel Authentication.
+
 ## Checks
 
 ```bash
@@ -28,3 +34,17 @@ npm run typecheck
 npm run lint
 npm run build
 ```
+
+## Agent skills
+
+### Issue tracker
+
+Issues live as markdown files under `.scratch/<feature>/`. See `docs/agents/issue-tracker.md`.
+
+### Triage labels
+
+Five canonical roles mapped one-to-one (`needs-triage`, `needs-info`, `ready-for-agent`, `ready-for-human`, `wontfix`). See `docs/agents/triage-labels.md`.
+
+### Domain docs
+
+Single-context: `GLOSSARY.md` and `docs/adr/` at the repo root. See `docs/agents/domain.md`.

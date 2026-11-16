@@ -1,0 +1,6 @@
+.env
+.env.*
+.commandcode
+.next
+node_modules
+tsconfig.tsbuildinfo

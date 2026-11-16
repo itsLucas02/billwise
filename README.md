@@ -2,6 +2,8 @@
 
 **Understand your Malaysian telco bill. Pay only for what you actually need.**
 
+**Live demo:** <https://billwise-blush.vercel.app>
+
 BillWise is a bill-decoding and plan-shopping demo for Malaysian telco customers. Paste in a bill from Unifi, Maxis, CelcomDigi, TIME, Allo or U Mobile and get a line-by-line breakdown with concrete findings — duplicate charges, an 8% SST line where telco tax should be 6%, a rebate that is about to expire, a device instalment running longer than it should. It also compares 46 plans across the 6 providers, walks you through coverage checks without guessing, and gives you a workspace to escalate a billing dispute through the right channels.
 
 > **The providers are real; the bills are not.** Provider names, plan names, prices, contact details and source links come from each telco's own published pages and were last checked by hand in Nov 2026. The six sample bills use invented account numbers and amounts. BillWise is independent and not affiliated with any provider — always confirm prices on the provider's site before switching.
@@ -117,6 +119,30 @@ npm run typecheck
 npm run lint
 npm run build
 ```
+
+## Deployment
+
+Production is live at **<https://billwise-blush.vercel.app>**.
+
+| Field | Value |
+| --- | --- |
+| Platform | Vercel |
+| Scope | `dreamin-x` team (account `adreamin96-6176`) |
+| Project | `billwise` (`prj_zPXpnhBKj4R6Sxmp45QcOSXipcKD`) |
+| Region | Singapore (`sin1`) — same region as the Supabase database |
+| Production alias | <https://billwise-blush.vercel.app> |
+
+The project is linked from this working copy through `.vercel/` (gitignored). `DATABASE_URL` is stored as an encrypted Vercel environment variable for production, preview and development, sourced from `BILLWISE__DATABASE_URL_SESSION` in Bitwarden — no secrets live in the repository.
+
+Deploy a new production build from the repo root:
+
+```bash
+vercel deploy --prod
+```
+
+Vercel's per-deployment URLs (`billwise-<hash>-dreamin-x.vercel.app`) sit behind Vercel Authentication; the production alias above is the public entry point.
+
+Serverless functions execute in `sin1` (Singapore) so database queries stay in-region. Builds run in Vercel's default build region, which does not affect request latency.
 
 ## Accessibility & tone
 
