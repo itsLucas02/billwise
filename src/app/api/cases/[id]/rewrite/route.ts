@@ -1,4 +1,4 @@
-import { and, asc, count, eq, gt, inArray } from "drizzle-orm";
+import { and, count, desc, eq, gt, inArray } from "drizzle-orm";
 import { db } from "@/db";
 import { caseEvents, cases } from "@/db/schema";
 import { REWRITE_ACTIONS, buildRewriteMessages, cleanRewrite, type RewriteAction } from "@/lib/ai";
@@ -21,7 +21,7 @@ export async function POST(req: Request, ctx: Ctx) {
 
   const body = await readJson(req);
   const action = String(body.action) as RewriteAction;
-  if (!(action in REWRITE_ACTIONS)) return jsonError("Unknown rewrite option.");
+  if (!Object.hasOwn(REWRITE_ACTIONS, action)) return jsonError("Unknown rewrite option.");
   const lang = body.lang === "ms" ? "ms" : "en";
   const draft = typeof body.draft === "string" ? body.draft.trim() : "";
   if (draft.length < 20) return jsonError("Write a little more in the draft first.");
@@ -43,7 +43,7 @@ export async function POST(req: Request, ctx: Ctx) {
   const notes = action === "notes"
     ? (await db.select({ text: caseEvents.text }).from(caseEvents)
         .where(and(eq(caseEvents.caseId, row.id), inArray(caseEvents.kind, ["note", "contact", "reply"])))
-        .orderBy(asc(caseEvents.createdAt)).limit(15)).map((e) => e.text)
+        .orderBy(desc(caseEvents.createdAt)).limit(15)).map((e) => e.text).reverse()
     : [];
   if (action === "notes" && !notes.length) return jsonError("Add a note to the timeline first, then try again.");
 
