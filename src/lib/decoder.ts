@@ -252,6 +252,27 @@ function explain(it: LineItem, service: BillMeta["service"], providerName: strin
 
 /* ───────────────────────── analysis ───────────────────────── */
 
+// How the bill health score is worked out; AnalysisView explains the same numbers on screen.
+export const SCORE_PENALTY: Record<Severity, number> = { high: 18, medium: 8, low: 2, good: 0 };
+export const SCORE_CAP_WITH_ACTION = 69;
+
+// English and Malay month names (and their usual short forms) to a month number.
+const MONTHS: Array<[RegExp, number]> = [
+  [/^jan/, 1], [/^(feb|februari)/, 2], [/^mac|^mar/, 3], [/^apr/, 4], [/^(may|mei)/, 5], [/^jun/, 6],
+  [/^jul/, 7], [/^(aug|ogos|ogo)/, 8], [/^sep/, 9], [/^(oct|okt)/, 10], [/^nov/, 11], [/^(dec|dis)/, 12],
+];
+
+/** The bill's month as "yyyy-mm", from the period or bill date ("07/08/2026", "07 Aug 2026", "Ogos 2026"); undefined when unreadable. */
+export function billMonthOf(meta: Pick<BillMeta, "period" | "billDate">): string | undefined {
+  const text = meta.period ?? meta.billDate;
+  if (!text) return undefined;
+  const num = text.match(/\b\d{1,2}[/.-](\d{1,2})[/.-](\d{4})\b/);
+  if (num && Number(num[1]) >= 1 && Number(num[1]) <= 12) return `${num[2]}-${num[1].padStart(2, "0")}`;
+  const word = text.match(/\b([A-Za-z]{3,9})\.?,?\s+(\d{4})\b/);
+  const month = word && MONTHS.find(([re]) => re.test(word[1].toLowerCase()))?.[1];
+  return month ? `${word![2]}-${String(month).padStart(2, "0")}` : undefined;
+}
+
 export function decodeBill(input: DecodeInput): Analysis {
   const text = (input.text || "").replace(/\r/g, "").slice(0, 20000);
   const lines = text.split("\n").map((l) => l.replace(/\t/g, "  ").trim()).filter(Boolean);
@@ -579,7 +600,7 @@ export function decodeBill(input: DecodeInput): Analysis {
       amount: reconnect,
       itemIds: reconnectItems.map((i) => i.id),
       action: "dispute",
-      issueType: "late_fee",
+      issueType: "reconnection",
     });
   }
   if (plainLate > 0) {
@@ -757,8 +778,8 @@ export function decodeBill(input: DecodeInput): Analysis {
 
   const hasHigh = findings.some((f) => f.severity === "high");
   let score = 100;
-  for (const f of findings) score -= f.severity === "high" ? 18 : f.severity === "medium" ? 8 : f.severity === "low" ? 2 : 0;
-  score = Math.max(8, Math.min(hasHigh ? 69 : 100, Math.round(score)));
+  for (const f of findings) score -= SCORE_PENALTY[f.severity];
+  score = Math.max(8, Math.min(hasHigh ? SCORE_CAP_WITH_ACTION : 100, Math.round(score)));
   const verdict = hasHigh ? (score >= 50 ? "Needs your attention" : "Act on this bill") : score >= 85 ? "Looks healthy" : "A few things to check";
 
   const parts = [`${rm(regular)} is your regular monthly service`];

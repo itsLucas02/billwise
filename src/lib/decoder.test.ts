@@ -1,6 +1,6 @@
 import { test } from "node:test";
 import assert from "node:assert/strict";
-import { decodeBill } from "./decoder.ts";
+import { billMonthOf, decodeBill } from "./decoder.ts";
 
 // Redacted from a real Unifi customer's bills (Aug and Sep 2026): account one bill behind, reconnection fee each month.
 const AUG = `Unifi bill — Bill Date: 07 Aug 2026
@@ -75,4 +75,17 @@ test("a stated pre-tax 'this month's charges' is not a mismatch; odd apostrophes
 test("a Yes (YTL) bill is recognised, but the word 'yes' alone is not", () => {
   assert.equal(decodeBill({ text: "YTL Communications Sdn Bhd\nYes Infinite Basic 58.00\nService Tax 6% 3.48" }).meta.provider, "yes");
   assert.equal(decodeBill({ text: "Paid with yes thanks\nMonthly fee 58.00" }).meta.provider, null);
+});
+
+test("a reconnection fee opens a reconnection case, not a late-fee one", () => {
+  const f = decodeBill({ text: SEP, provider: "unifi" }).findings.find((x) => /reconnection fee/i.test(x.title));
+  assert.equal(f?.issueType, "reconnection");
+});
+
+test("the bill month is read from word dates as well as numeric ones", () => {
+  assert.equal(billMonthOf(decodeBill({ text: AUG, provider: "unifi" }).meta), "2026-08");
+  assert.equal(billMonthOf({ billDate: "07/09/2026" }), "2026-09");
+  assert.equal(billMonthOf({ period: "01 Ogos 2026 - 31 Ogos 2026" }), "2026-08");
+  assert.equal(billMonthOf({ billDate: "September 2026" }), "2026-09");
+  assert.equal(billMonthOf({ billDate: "soon" }), undefined);
 });

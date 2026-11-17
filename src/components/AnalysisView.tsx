@@ -6,7 +6,7 @@ import {
   ArrowRight, ChevronDown, CircleAlert, CircleCheck, Info, LifeBuoy, Lightbulb, PiggyBank, Printer, ScanText, Sparkles, TriangleAlert,
   type LucideIcon,
 } from "lucide-react";
-import { CATEGORY_INFO, type Analysis, type Finding, type Severity } from "@/lib/decoder";
+import { CATEGORY_INFO, SCORE_CAP_WITH_ACTION, SCORE_PENALTY, billMonthOf, type Analysis, type Finding, type Severity } from "@/lib/decoder";
 import { getPlan } from "@/lib/plans";
 import { PROVIDERS, primaryContact } from "@/lib/providers";
 import { fmtDate, rm, rmShort } from "@/lib/format";
@@ -18,6 +18,35 @@ const SEV: Record<Severity, { label: string; icon: LucideIcon; box: string; dot:
   low: { label: "Good to know", icon: Info, box: "border-line bg-white", dot: "bg-sky-soft text-sky" },
   good: { label: "Looks fine", icon: CircleCheck, box: "border-pandan/25 bg-pandan-soft/60", dot: "bg-pandan text-white" },
 };
+
+// "How is this measured?": the scoring rule, worked through for this bill's own findings.
+function ScoreHow({ analysis }: { analysis: Analysis }) {
+  const count = (s: Severity) => analysis.findings.filter((f) => f.severity === s).length;
+  const steps = (["high", "medium", "low"] as const).filter((s) => count(s) > 0);
+  const raw = 100 - steps.reduce((sum, s) => sum + count(s) * SCORE_PENALTY[s], 0);
+  // say "capped" or "at least" only when that rule actually changed the number
+  const note = raw > analysis.score ? `, capped at ${analysis.score}` : raw < analysis.score ? `, kept at the minimum of ${analysis.score}` : "";
+  return (
+    <details className="group mt-2 max-w-[17rem] text-left text-sm text-paper/75 md:mx-auto">
+      <summary className="cursor-pointer list-none font-semibold text-paper/80 underline decoration-paper/30 underline-offset-4 hover:text-paper [&::-webkit-details-marker]:hidden md:text-center">
+        How this score works
+      </summary>
+      <div className="mt-2 space-y-1.5 leading-snug">
+        <p>
+          Every bill starts at 100. Each finding takes points off: {SEV.high.label} −{SCORE_PENALTY.high}, {SEV.medium.label} −{SCORE_PENALTY.medium},{" "}
+          {SEV.low.label} −{SCORE_PENALTY.low}. Anything to act on keeps the score at {SCORE_CAP_WITH_ACTION} or below.
+        </p>
+        {steps.length > 0 && (
+          <p className="font-semibold text-paper">
+            This bill: 100{steps.map((s) => ` − ${count(s)} × ${SCORE_PENALTY[s]}`).join("")}
+            {note} = {analysis.score}
+          </p>
+        )}
+        <p>It measures what needs your attention, not whether your plan is good value.</p>
+      </div>
+    </details>
+  );
+}
 
 function ScoreRing({ score }: { score: number }) {
   const color = score >= 85 ? "#2fd39a" : score >= 60 ? "#ffc23d" : "#ff6a4d";
@@ -59,8 +88,8 @@ export function AnalysisView({ analysis, id, title, createdAt }: { analysis: Ana
       const labels = [...new Set(a.items.filter((i) => f.itemIds?.includes(i.id)).map((i) => i.label))];
       q.set("label", (labels.length ? labels.join(", ") : f.title).replace(/[“”]/g, "\""));
     }
-    const d = (m.period ?? m.billDate)?.match(/\b\d{1,2}[/.-](\d{1,2})[/.-](\d{4})\b/);
-    if (d) q.set("month", `${d[2]}-${d[1].padStart(2, "0")}`);
+    const month = billMonthOf(m);
+    if (month) q.set("month", month);
     if (f?.issueType === "promo" && m.promisedPrice) q.set("promised", String(m.promisedPrice));
     if (id) q.set("analysis", id);
     return `/help/new?${q.toString()}`;
@@ -106,6 +135,7 @@ export function AnalysisView({ analysis, id, title, createdAt }: { analysis: Ana
             <div className="md:text-center">
               <p className="text-sm uppercase tracking-wider text-paper/60">Bill health</p>
               <p className="font-display text-xl font-bold">{a.verdict}</p>
+              <ScoreHow analysis={a} />
             </div>
           </div>
         </div>

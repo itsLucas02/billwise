@@ -26,6 +26,7 @@ const PLACEHOLDERS: Partial<Record<IssueType, string>> = {
   content: "e.g. Two charges of RM22 for a game subscription I never signed up for.",
   roaming: "e.g. I was in Bangkok 2–6 Sept. I thought roaming was off, but I was charged RM186.",
   late_fee: "e.g. I paid two days late because of a bank transfer delay. First time this has happened.",
+  reconnection: "e.g. My line was barred in August after I fell one bill behind. I have now paid the overdue amount.",
   penalty: "e.g. My contract started Jan 2024 so it ended Jan 2026, but I was charged a penalty when I cancelled.",
   speed: "e.g. My 300Mbps plan gives 40–60Mbps on a LAN cable every evening for the past 3 weeks.",
 };

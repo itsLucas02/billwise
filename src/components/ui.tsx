@@ -55,8 +55,8 @@ export function ProviderBadge({ id, size = "md", className }: { id: ProviderId |
         p.logo && "border border-line",
         className,
       )}
-      // with a logo the pill stays clear so the transparent logo keeps its own colours; without one it is filled in the brand colour
-      style={p.logo ? { color: "var(--color-ink)" } : { backgroundColor: p.color, color: p.ink }}
+      // with a logo the pill is white so the transparent logo keeps its own colours and stays readable on dark sections too
+      style={p.logo ? { backgroundColor: "#fff", color: "var(--color-ink)" } : { backgroundColor: p.color, color: p.ink }}
     >
       {p.logo ? (
         // eslint-disable-next-line @next/next/no-img-element

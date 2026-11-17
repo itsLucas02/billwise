@@ -3,7 +3,7 @@ import { rm } from "./format";
 
 export type IssueType =
   | "unknown_charge" | "promo" | "double" | "after_cancel" | "content"
-  | "roaming" | "late_fee" | "penalty" | "speed" | "other";
+  | "roaming" | "late_fee" | "reconnection" | "penalty" | "speed" | "other";
 
 export type CaseStatus = "open" | "contacted" | "awaiting" | "escalated" | "resolved" | "closed";
 
@@ -115,6 +115,22 @@ export const ISSUES: Record<IssueType, IssueInfo> = {
     paraMs: "Saya telah dikenakan caj bayaran lewat. Ini berlaku secara tidak sengaja dan bil tersebut telah dijelaskan. Sebagai pelanggan setia, saya memohon pengecualian sekali sahaja bagi caj ini.",
     outcomeEn: "a one-time waiver of the late payment fee",
     outcomeMs: "pengecualian sekali sahaja bagi caj bayaran lewat",
+  },
+  reconnection: {
+    label: "Reconnection fee waiver",
+    labelMs: "Pengecualian caj sambung semula",
+    emoji: "🔌",
+    hint: "Your line was barred for an overdue balance, then charged to restore it.",
+    ask: [
+      "Can the reconnection fee be waived as a goodwill gesture?",
+      "How much do I need to pay, and by when, to bring my account fully up to date?",
+      "Can auto-debit or a payment arrangement be set up so the line isn't barred again?",
+    ],
+    evidence: ["The bill showing the reconnection fee", "Proof of your recent payments (date and amount)"],
+    paraEn: "My line was barred because an earlier balance was overdue, and I was charged a reconnection fee to restore the service. I want to bring my account fully up to date so this does not happen again. I kindly request that the reconnection fee be waived as a goodwill gesture, and that you confirm the exact amount needed to clear the overdue balance.",
+    paraMs: "Talian saya telah disekat kerana baki terdahulu tertunggak, dan saya dikenakan caj sambung semula untuk memulihkan perkhidmatan. Saya ingin menjadikan akaun saya terkini sepenuhnya supaya perkara ini tidak berulang. Saya memohon agar caj sambung semula ini dikecualikan sebagai tanda muhibah, dan mohon sahkan jumlah tepat yang perlu dibayar untuk menjelaskan baki tertunggak.",
+    outcomeEn: "the reconnection fee waived as a goodwill gesture, and confirmation of the amount needed to clear my overdue balance",
+    outcomeMs: "caj sambung semula dikecualikan sebagai tanda muhibah, serta pengesahan jumlah yang perlu dibayar untuk menjelaskan baki tertunggak",
   },
   penalty: {
     label: "Early termination penalty",
