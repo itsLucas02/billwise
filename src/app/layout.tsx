@@ -19,6 +19,9 @@ const bricolage = localFont({
 });
 
 export const metadata: Metadata = {
+  metadataBase: new URL("https://billwise-blush.vercel.app"),
+  openGraph: { siteName: "BillWise", locale: "en_MY", type: "website" },
+  twitter: { card: "summary_large_image" },
   title: {
     default: "BillWise — Understand your telco bill, pay only for what you need",
     template: "%s · BillWise",
