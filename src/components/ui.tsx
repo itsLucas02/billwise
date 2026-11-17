@@ -52,14 +52,15 @@ export function ProviderBadge({ id, size = "md", className }: { id: ProviderId |
       className={cn(
         "inline-flex items-center gap-1.5 rounded-full font-bold tracking-tight",
         size === "sm" ? "px-2.5 py-0.5 text-[0.78rem]" : "px-3 py-1 text-sm",
+        p.logo && "border border-line",
         className,
       )}
-      style={{ backgroundColor: p.color, color: p.ink }}
+      // with a logo the pill stays clear so the transparent logo keeps its own colours; without one it is filled in the brand colour
+      style={p.logo ? { color: "var(--color-ink)" } : { backgroundColor: p.color, color: p.ink }}
     >
       {p.logo ? (
-        // Logo on a small white tile so the provider's own colours stay intact; the name stays as text for screen readers.
         // eslint-disable-next-line @next/next/no-img-element
-        <img src={p.logo} alt="" aria-hidden className={cn("rounded bg-white object-contain p-px", size === "sm" ? "h-3.5 w-3.5" : "h-4 w-4")} />
+        <img src={p.logo} alt="" aria-hidden className={cn("w-auto object-contain", size === "sm" ? "h-4" : "h-[1.15rem]")} />
       ) : (
         <span className="h-1.5 w-1.5 rounded-full" style={{ backgroundColor: p.ink, opacity: 0.8 }} aria-hidden />
       )}

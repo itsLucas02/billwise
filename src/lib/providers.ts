@@ -37,6 +37,7 @@ export const PROVIDERS: Record<ProviderId, Provider> = {
   unifi: {
     id: "unifi",
     name: "Unifi",
+    logo: "/logos/unifi.svg",
     company: "Telekom Malaysia (TM)",
     color: "#F26B1D",
     ink: "#ffffff",
@@ -63,6 +64,7 @@ export const PROVIDERS: Record<ProviderId, Provider> = {
   maxis: {
     id: "maxis",
     name: "Maxis",
+    logo: "/logos/maxis.png",
     company: "Maxis Broadband Sdn Bhd",
     color: "#1C9A55",
     ink: "#ffffff",
@@ -89,6 +91,7 @@ export const PROVIDERS: Record<ProviderId, Provider> = {
   celcomdigi: {
     id: "celcomdigi",
     name: "CelcomDigi",
+    logo: "/logos/celcomdigi.svg",
     company: "CelcomDigi Berhad",
     color: "#2F5BEA",
     ink: "#ffffff",
@@ -115,6 +118,7 @@ export const PROVIDERS: Record<ProviderId, Provider> = {
   time: {
     id: "time",
     name: "TIME",
+    logo: "/logos/time.svg",
     company: "TIME dotCom Berhad",
     color: "#F454CD",
     ink: "#1f1600",
@@ -136,6 +140,7 @@ export const PROVIDERS: Record<ProviderId, Provider> = {
   allo: {
     id: "allo",
     name: "Allo",
+    logo: "/logos/allo.svg",
     company: "Allo Technology Sdn Bhd (TNB group)",
     color: "#712A81",
     ink: "#ffffff",
@@ -160,6 +165,7 @@ export const PROVIDERS: Record<ProviderId, Provider> = {
   umobile: {
     id: "umobile",
     name: "U Mobile",
+    logo: "/logos/umobile.png",
     company: "U Mobile Sdn Bhd",
     color: "#F5A300",
     ink: "#1f1600",
@@ -185,6 +191,7 @@ export const PROVIDERS: Record<ProviderId, Provider> = {
   yes: {
     id: "yes",
     name: "Yes",
+    logo: "/logos/yes.svg",
     company: "YTL Communications Sdn Bhd",
     color: "#E6007E", // Yes magenta, darkened just enough for 4.5:1 with white badge text
     ink: "#ffffff",
