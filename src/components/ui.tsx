@@ -81,11 +81,13 @@ export function PageHeader({
   eyebrow,
   title,
   intro,
+  art,
   children,
 }: {
   eyebrow: string;
   title: ReactNode;
   intro?: ReactNode;
+  art?: ReactNode; // decorative art in the empty right half on wide screens
   children?: ReactNode;
 }) {
   return (
@@ -93,11 +95,12 @@ export function PageHeader({
       <div className="dotgrid absolute inset-0 opacity-70" aria-hidden />
       <div className="relative mx-auto max-w-6xl px-4 py-9 md:py-14">
         <p className="text-sm font-bold uppercase tracking-[0.16em] text-pandan-dark">{eyebrow}</p>
-        <h1 className="mt-3 max-w-3xl font-display text-[clamp(2.1rem,5.4vw,3.6rem)] font-bold leading-[1.02] tracking-tight text-ink">
+        <h1 className={cn("mt-3 max-w-3xl font-display text-[clamp(2.1rem,5.4vw,3.6rem)] font-bold leading-[1.02] tracking-tight text-ink", !!art && "lg:max-w-[38rem]")}>
           {title}
         </h1>
-        {intro && <p className="mt-4 max-w-2xl text-lg leading-relaxed text-muted">{intro}</p>}
+        {intro && <p className={cn("mt-4 max-w-2xl text-lg leading-relaxed text-muted", !!art && "lg:max-w-[36rem]")}>{intro}</p>}
         {children}
+        {art}
       </div>
     </section>
   );
@@ -115,10 +118,10 @@ export function SectionTitle({ title, sub, action }: { title: ReactNode; sub?: R
   );
 }
 
-export function EmptyState({ icon, title, text, action }: { icon?: ReactNode; title: string; text?: ReactNode; action?: ReactNode }) {
+export function EmptyState({ icon, art, title, text, action }: { icon?: ReactNode; art?: ReactNode; title: string; text?: ReactNode; action?: ReactNode }) {
   return (
     <div className="flex flex-col items-center rounded-3xl border-2 border-dashed border-line bg-white/60 px-6 py-10 text-center">
-      {icon && <div className="mb-3 grid h-14 w-14 place-items-center rounded-2xl bg-cream text-ink-soft">{icon}</div>}
+      {art ? <div className="-mt-4 mb-1 w-28">{art}</div> : icon && <div className="mb-3 grid h-14 w-14 place-items-center rounded-2xl bg-cream text-ink-soft">{icon}</div>}
       <p className="font-display text-lg font-bold">{title}</p>
       {text && <p className="mt-1 max-w-md text-muted">{text}</p>}
       {action && <div className="mt-5">{action}</div>}

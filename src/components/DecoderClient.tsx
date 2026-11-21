@@ -1,6 +1,7 @@
 "use client";
 
 import Link from "next/link";
+import { Spot } from "./stickers/Spot";
 import { useCallback, useEffect, useRef, useState } from "react";
 import { BookOpen, ChevronDown, ClipboardPaste, FileText, FileUp, History, ListPlus, LoaderCircle, Plus, ScanText, Trash2, Wand2 } from "lucide-react";
 import { linesFromPdfItems, type PdfTextItem } from "@/lib/pdfText";
@@ -357,8 +358,31 @@ export function DecoderClient({ initialSample }: { initialSample?: string }) {
       </div>
 
       <div ref={resultRef} className="mx-auto max-w-6xl scroll-mt-20 px-4">
+        {busy && busy !== "pdf" && <DecodingScene />}
         {result && <AnalysisView key={result.id} analysis={result.analysis} id={result.id} title={result.title} createdAt={result.createdAt} />}
       </div>
     </>
+  );
+}
+
+// shown only if decoding takes longer than a blink, so a fast decode never flashes it
+function DecodingScene() {
+  const [show, setShow] = useState(false);
+  useEffect(() => {
+    const t = setTimeout(() => setShow(true), 250);
+    return () => clearTimeout(t);
+  }, []);
+  if (!show) return null;
+  return (
+    <div role="status" className="mb-6 flex animate-rise items-center gap-4 rounded-3xl border border-line bg-white p-5 shadow-card">
+      <div aria-hidden className="relative -my-2 h-28 w-32 shrink-0">
+        <Spot name="bills" loop className="absolute left-0 top-0 w-28" />
+        <Spot name="search" loop enter={0.2} className="absolute -right-1 bottom-0 w-16" />
+      </div>
+      <div>
+        <p className="font-display text-lg font-bold">Reading your bill line by line…</p>
+        <p className="text-muted">Checking each charge, the 6% service tax and any promotion that has ended.</p>
+      </div>
+    </div>
   );
 }

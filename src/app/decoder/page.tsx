@@ -1,4 +1,5 @@
 import type { Metadata } from "next";
+import { HeaderArt } from "@/components/stickers/Spot";
 import { DecoderClient } from "@/components/DecoderClient";
 import { PageHeader } from "@/components/ui";
 
@@ -10,6 +11,7 @@ export default async function DecoderPage({ searchParams }: { searchParams: Prom
   return (
     <>
       <PageHeader
+        art={<HeaderArt scene="decoder" />}
         eyebrow="Bill Decoder · Fahami bil anda"
         title={<>What am I <span className="mark">actually</span> paying for?</>}
         intro="Paste your bill and BillWise explains every charge in plain language, checks the 6% service tax, spots duplicates and ended promotions, and shows you how to save."

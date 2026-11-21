@@ -1,4 +1,5 @@
 import type { Metadata } from "next";
+import { HeaderArt } from "@/components/stickers/Spot";
 import { PlanFinder, type FinderInitial } from "@/components/PlanFinder";
 import { PageHeader } from "@/components/ui";
 import { PLANS } from "@/lib/plans";
@@ -22,6 +23,7 @@ export default async function PlansPage({ searchParams }: { searchParams: Promis
   return (
     <>
       <PageHeader
+        art={<HeaderArt scene="plans" />}
         eyebrow="Plan Finder · Cari pelan terbaik"
         title={<>Find a plan that fits your <span className="mark">home</span> and your budget</>}
         intro={`Answer a few simple questions and we'll rank ${PLANS.length} real fibre and mobile plans from Unifi, Maxis, CelcomDigi, TIME, Allo, U Mobile and Yes — with honest reasons for each. Prices are hand-checked and linked to each provider's own site.`}

@@ -1,6 +1,7 @@
 "use client";
 
 import Link from "next/link";
+import { Spot } from "./stickers/Spot";
 import { useEffect } from "react";
 import {
   ArrowRight, ChevronDown, CircleAlert, CircleCheck, Info, LifeBuoy, Lightbulb, PiggyBank, Printer, ScanText, Sparkles, TriangleAlert,
@@ -122,7 +123,11 @@ export function AnalysisView({ analysis, id, title, createdAt }: { analysis: Ana
               {matched && <span className="rounded-full bg-white/10 px-3 py-1 text-sm font-semibold">{matched.name}</span>}
               {createdAt && <span className="text-sm text-paper/60">Decoded {fmtDate(createdAt)} · checked by rules, not AI</span>}
             </div>
-            <h2 className="mt-3 font-display text-3xl font-bold tracking-tight md:text-4xl">{title ?? "Your bill, decoded"}</h2>
+            <div className="mt-3 flex items-center gap-3">
+              {/* a trophy when nothing needs doing, the magnifier when there is something to look at */}
+              <Spot name={issues.length ? "search" : "trophy"} onDark enter={0.3} className="-my-3 -ml-2 w-16 md:w-20" />
+              <h2 className="font-display text-3xl font-bold tracking-tight md:text-4xl">{title ?? "Your bill, decoded"}</h2>
+            </div>
             <dl className="mt-3 flex flex-wrap gap-x-6 gap-y-1 text-sm text-paper/75">
               {m.period && <div><dt className="inline">Period: </dt><dd className="inline font-semibold text-paper">{m.period}</dd></div>}
               {m.dueDate && <div><dt className="inline">Due: </dt><dd className="inline font-semibold text-paper">{m.dueDate}</dd></div>}

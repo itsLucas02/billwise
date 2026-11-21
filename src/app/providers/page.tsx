@@ -1,5 +1,6 @@
 import type { Metadata } from "next";
 import Link from "next/link";
+import { HeaderArt } from "@/components/stickers/Spot";
 import { ExternalLink, Globe, LifeBuoy, Mail, MessageCircle, Phone, RadioTower, Scale, Sparkles } from "lucide-react";
 import { Card, PageHeader, ProviderBadge, btn, btnSm, cn } from "@/components/ui";
 import { PLANS } from "@/lib/plans";
@@ -13,6 +14,7 @@ export default function ProvidersPage() {
   return (
     <>
       <PageHeader
+        art={<HeaderArt scene="providers" />}
         eyebrow="Provider directory · Direktori penyedia"
         title={<>Who to contact, and <span className="mark">how</span></>}
         intro="Customer service channels, self-service apps and coverage checkers for seven Malaysian telcos. Details come from each provider's own site — confirm anything time-sensitive directly with them."

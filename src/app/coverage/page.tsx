@@ -1,4 +1,5 @@
 import type { Metadata } from "next";
+import { HeaderArt } from "@/components/stickers/Spot";
 import { CoverageClient } from "@/components/CoverageClient";
 import { PageHeader } from "@/components/ui";
 
@@ -10,6 +11,7 @@ export default async function CoveragePage({ searchParams }: { searchParams: Pro
   return (
     <>
       <PageHeader
+        art={<HeaderArt scene="coverage" />}
         eyebrow="Coverage Discovery · Semak liputan"
         title={<>What can I <span className="mark">really</span> get at my address?</>}
         intro="Check every provider the right way, keep track of what their coverage checkers say, and understand your mobile signal and internet speed."

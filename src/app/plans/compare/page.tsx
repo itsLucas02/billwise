@@ -1,6 +1,7 @@
 import type { Metadata } from "next";
 import Link from "next/link";
 import { ArrowLeft, ExternalLink, Trophy } from "lucide-react";
+import { Spot } from "@/components/stickers/Spot";
 import { EmptyState, ProviderBadge, btn, btnSm, cn } from "@/components/ui";
 import { PLANS_REVIEWED, contractLabel, dataLabel, getPlan, type Plan } from "@/lib/plans";
 import { rmShort, speedLabel, withSST } from "@/lib/format";
@@ -63,7 +64,7 @@ export default async function ComparePage({ searchParams }: { searchParams: Prom
       {mixed && <p className="mt-3 rounded-2xl bg-kunyit-soft px-4 py-3 text-[0.95rem]">You&apos;re comparing a home fibre plan with a mobile plan — some rows won&apos;t apply to both.</p>}
 
       {plans.length === 0 ? (
-        <div className="mt-8"><EmptyState title="Nothing to compare yet" text="Choose up to 3 plans in Plan Finder and tap “Compare now”." action={<Link href="/plans?tab=browse" className={btn.primary}>Browse plans</Link>} /></div>
+        <div className="mt-8"><EmptyState art={<Spot name="coins" />} title="Nothing to compare yet" text="Choose up to 3 plans in Plan Finder and tap “Compare now”." action={<Link href="/plans?tab=browse" className={btn.primary}>Browse plans</Link>} /></div>
       ) : (
         <div className="mt-8 overflow-x-auto rounded-3xl border border-line bg-white shadow-card">
           <table className="w-full min-w-[640px] border-collapse text-left">

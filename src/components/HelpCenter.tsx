@@ -1,8 +1,9 @@
 "use client";
 
+import { Spot } from "./stickers/Spot";
 import Link from "next/link";
 import { useEffect, useState } from "react";
-import { ArrowRight, CalendarDays, ExternalLink, HandCoins, Landmark, LifeBuoy, LoaderCircle, Phone, Plus, Scale } from "lucide-react";
+import { ArrowRight, CalendarDays, ExternalLink, HandCoins, Landmark, LoaderCircle, Phone, Plus, Scale } from "lucide-react";
 import { api } from "@/lib/client";
 import { ISSUES, ISSUE_TYPES, STATUS_INFO, type CaseStatus, type IssueType } from "@/lib/cases";
 import { ESCALATION, PROVIDERS, PROVIDER_IDS, primaryContact } from "@/lib/providers";
@@ -86,7 +87,7 @@ export function HelpCenter() {
                 })}
               </ul>
             ) : (
-              <EmptyState icon={<LifeBuoy className="h-7 w-7" />} title="No cases yet" text="When you start a case, it's saved here so you can track replies, reference numbers and follow-ups." action={<Link href="/help/new" className={btn.primary}>Start a case</Link>} />
+              <EmptyState art={<Spot name="mailbox" />} title="No cases yet" text="When you start a case, it's saved here so you can track replies, reference numbers and follow-ups." action={<Link href="/help/new" className={btn.primary}>Start a case</Link>} />
             )}
           </>
         )}

@@ -1,5 +1,6 @@
 "use client";
 
+import { Spot } from "./stickers/Spot";
 import Link from "next/link";
 import { useRouter } from "next/navigation";
 import { useCallback, useEffect, useMemo, useState } from "react";
@@ -218,7 +219,7 @@ export function CaseDetail({ id }: { id: string }) {
   if (error) {
     return (
       <div className="mx-auto max-w-3xl px-4 py-12">
-        <EmptyState title="We couldn't find this case" text="It may have been deleted, or it was created on a different browser." action={<Link href="/help" className={btn.primary}>Back to Billing Help</Link>} />
+        <EmptyState art={<Spot name="search" />} title="We couldn't find this case" text="It may have been deleted, or it was created on a different browser." action={<Link href="/help" className={btn.primary}>Back to Billing Help</Link>} />
       </div>
     );
   }
@@ -268,6 +269,16 @@ export function CaseDetail({ id }: { id: string }) {
             </li>
           ))}
         </ol>
+
+        {status === "resolved" && (
+          <div className="mt-6 flex items-center gap-4 rounded-2xl bg-pandan-soft px-4 py-3">
+            <Spot name="trophy" enter={0.2} className="-my-3 w-20" />
+            <div>
+              <p className="font-display text-lg font-bold text-pandan-dark">Sorted. Well done for following it through.</p>
+              <p className="text-ink-soft">{item.resolvedAmount ? <>You got <strong>{rm(item.resolvedAmount)}</strong> back. Check your next bill to make sure it shows.</> : "Check your next bill to make sure the fix shows up."}</p>
+            </div>
+          </div>
+        )}
 
         <div className="mt-6 flex flex-wrap gap-2">
           {status === "open" && <button type="button" onClick={() => update({ status: "contacted" }, "s")} className={btn.primary}><Phone className="h-5 w-5" /> I&apos;ve contacted {p.name}</button>}

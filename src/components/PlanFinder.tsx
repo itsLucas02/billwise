@@ -1,5 +1,6 @@
 "use client";
 
+import { Spot } from "./stickers/Spot";
 import Link from "next/link";
 import { useCallback, useEffect, useMemo, useRef, useState, type ReactNode } from "react";
 import {
@@ -45,6 +46,7 @@ function PlanCard({
 }: {
   plan: Plan; rec?: Recommendation; rank?: number; compared: boolean; saved: boolean; onCompare: () => void; onSave: () => void;
 }) {
+  const [justSaved, setJustSaved] = useState(false);
   const price = rec?.monthly ?? plan.price;
   const isBundle = rec && plan.bundlePrice !== undefined && rec.monthly === plan.bundlePrice && plan.bundlePrice !== plan.price;
   const color = PROVIDERS[plan.provider].color;
@@ -102,8 +104,8 @@ function PlanCard({
           <button type="button" aria-pressed={compared} onClick={onCompare} className={cn(btn.secondary, btnSm, "flex-1", compared && "!border-ink !bg-ink !text-paper")}>
             <Columns3 className="h-4 w-4" /> {compared ? "Comparing" : "Compare"}
           </button>
-          <button type="button" aria-pressed={saved} onClick={onSave} className={cn(btn.ghost, btnSm, "flex-1")}>
-            {saved ? <BookmarkCheck className="h-4 w-4 text-pandan" /> : <Bookmark className="h-4 w-4" />} {saved ? "Saved" : "Save"}
+          <button type="button" aria-pressed={saved} onClick={() => { setJustSaved(!saved); onSave(); }} className={cn(btn.ghost, btnSm, "flex-1")}>
+            {saved && justSaved ? <Spot name="heart" className="-my-2 -ml-1 h-8 w-8" /> : saved ? <BookmarkCheck className="h-4 w-4 text-pandan" /> : <Bookmark className="h-4 w-4" />} {saved ? "Saved" : "Save"}
           </button>
         </div>
         <p className="mt-3 flex flex-wrap items-center gap-x-1.5 text-xs text-muted">
@@ -488,7 +490,7 @@ export function PlanFinder({ initial }: { initial: FinderInitial }) {
               <PlanCard key={p.id} plan={p} compared={compare.includes(p.id)} saved={saved.includes(p.id)} onCompare={() => toggleCompare(p.id)} onSave={() => toggleSave(p.id)} />
             ))}
           </div>
-          {!browsePlans.length && <EmptyState title="No plans match these filters" text="Try raising the maximum price or clearing provider filters." />}
+          {!browsePlans.length && <EmptyState art={<Spot name="search" />} title="No plans match these filters" text="Try raising the maximum price or clearing provider filters." />}
         </>
       )}
 
@@ -500,7 +502,7 @@ export function PlanFinder({ initial }: { initial: FinderInitial }) {
             ))}
           </div>
         ) : (
-          <EmptyState icon={<Bookmark className="h-7 w-7" />} title="No saved plans yet" text="Tap “Save” on any plan to keep a shortlist here." action={<button type="button" className={btn.primary} onClick={() => setTab("recommend")}>Get recommendations</button>} />
+          <EmptyState art={<Spot name="heart" />} title="No saved plans yet" text="Tap “Save” on any plan to keep a shortlist here." action={<button type="button" className={btn.primary} onClick={() => setTab("recommend")}>Get recommendations</button>} />
         )
       )}
 

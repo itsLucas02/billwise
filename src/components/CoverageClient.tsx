@@ -1,5 +1,6 @@
 "use client";
 
+import { Spot } from "./stickers/Spot";
 import Link from "next/link";
 import { useCallback, useEffect, useMemo, useState } from "react";
 import {
@@ -202,7 +203,7 @@ export function CoverageClient({ initialCheck }: { initialCheck?: string }) {
             {checks === null ? (
               <div className="grid place-items-center py-24 text-muted"><LoaderCircle className="h-8 w-8 animate-spin" /></div>
             ) : !selected ? (
-              <EmptyState icon={<MapPin className="h-7 w-7" />} title="Add your postcode to begin" text="We'll set up a checklist of every provider, with links to their official coverage checkers." />
+              <EmptyState art={<Spot name="pin" />} title="Add your postcode to begin" text="We'll set up a checklist of every provider, with links to their official coverage checkers." />
             ) : (
               <div className="space-y-5">
                 <Card>
@@ -404,7 +405,7 @@ export function CoverageClient({ initialCheck }: { initialCheck?: string }) {
                 )}
               </div>
             ) : (
-              <EmptyState icon={<Gauge className="h-7 w-7" />} title="Enter your result" text="We'll tell you whether it's your line or your Wi-Fi, and what to do next." />
+              <EmptyState art={<Spot name="phone" />} title="Enter your result" text="We'll tell you whether it's your line or your Wi-Fi, and what to do next." />
             )}
           </Card>
         </div>

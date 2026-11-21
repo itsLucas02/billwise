@@ -1,9 +1,10 @@
 "use client";
 
+import { Spot } from "./stickers/Spot";
 import Link from "next/link";
 import { useRouter } from "next/navigation";
 import { useEffect, useState } from "react";
-import { ArrowLeft, ChevronDown, LoaderCircle, ScanText, Trash2 } from "lucide-react";
+import { ArrowLeft, ChevronDown, LoaderCircle, Trash2 } from "lucide-react";
 import { api } from "@/lib/client";
 import { ConfirmDelete } from "./ConfirmDelete";
 import type { Analysis } from "@/lib/decoder";
@@ -43,7 +44,7 @@ export function SavedAnalysis({ id }: { id: string }) {
         )}
       </div>
       {error ? (
-        <EmptyState icon={<ScanText className="h-7 w-7" />} title="We couldn't find this bill" text="It may have been deleted, or it was decoded on a different browser." action={<Link href="/decoder" className={btn.primary}>Decode a bill</Link>} />
+        <EmptyState art={<Spot name="search" />} title="We couldn't find this bill" text="It may have been deleted, or it was decoded on a different browser." action={<Link href="/decoder" className={btn.primary}>Decode a bill</Link>} />
       ) : !data ? (
         <div className="grid place-items-center py-24 text-muted"><LoaderCircle className="h-8 w-8 animate-spin" /></div>
       ) : (
