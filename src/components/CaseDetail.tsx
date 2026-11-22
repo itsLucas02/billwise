@@ -337,9 +337,7 @@ export function CaseDetail({ id }: { id: string }) {
                 </div>
               </div>
             </div>
-            <label className="sr-only" htmlFor="draft">Message draft</label>
-            <textarea id="draft" key={flash} aria-busy={aiBusy !== null} className={cn("field mt-4 font-mono text-[0.92rem] leading-relaxed", flash > 0 && "animate-flash")} rows={channel === "chat" ? 7 : 16} value={draft} onChange={(e) => { setDraft(e.target.value); setUndo(null); setAiDone(""); }} />
-            <div className="mt-3 rounded-2xl bg-cream/60 p-4">
+            <div className="mt-4 rounded-2xl bg-cream/60 p-4">
               <div className="flex min-h-9 items-center justify-between gap-3">
                 <span className="flex items-center gap-1.5 text-sm font-semibold"><Sparkles className="h-4 w-4" aria-hidden /> AI rewrite</span>
                 {undo?.key === generated && (
@@ -359,6 +357,8 @@ export function CaseDetail({ id }: { id: string }) {
               {aiError && <p role="alert" className="mt-3 text-sm font-semibold text-[#a1260f]">{aiError}</p>}
               <p className="mt-3 border-t border-line pt-3 text-xs leading-relaxed text-muted">Sends this draft and the case details (plus your timeline notes, for Add my notes) to an AI service. It only rewords what&apos;s here; check the result before you send it.</p>
             </div>
+            <label className="sr-only" htmlFor="draft">Message draft</label>
+            <textarea id="draft" key={flash} aria-busy={aiBusy !== null} className={cn("field mt-3 font-mono text-[0.92rem] leading-relaxed", flash > 0 && "animate-flash")} rows={channel === "chat" ? 7 : 16} value={draft} onChange={(e) => { setDraft(e.target.value); setUndo(null); setAiDone(""); }} />
             <div className="mt-3 flex flex-wrap gap-2">
               <button type="button" onClick={copy} className={btn.primary}>{copied ? <Check className="h-5 w-5" /> : <Copy className="h-5 w-5" />} {copied ? "Copied!" : "Copy message"}</button>
               {channel === "email" && (
