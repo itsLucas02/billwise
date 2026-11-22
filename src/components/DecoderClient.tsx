@@ -16,7 +16,7 @@ import { Badge, Card, ProviderBadge, SimTag, btn, btnSm, cn } from "./ui";
 type Mode = "paste" | "sample" | "manual";
 interface Row { id: number; label: string; amount: string }
 interface HistoryItem { id: string; title: string; provider: string | null; total: number; score: number; createdAt: string }
-interface Result { id: string; title: string; createdAt: string; analysis: Analysis }
+interface Result { id: string; title: string; createdAt: string; analysis: Analysis; reused?: boolean; previousAt?: string }
 
 const GLOSSARY = [
   { t: "SST (Service tax)", d: "Government tax on your bill. For telco services it's 6%." },
@@ -359,6 +359,12 @@ export function DecoderClient({ initialSample }: { initialSample?: string }) {
 
       <div ref={resultRef} className="mx-auto max-w-6xl scroll-mt-20 px-4">
         {busy && busy !== "pdf" && <DecodingScene />}
+        {result?.reused && (
+          <p role="status" className="mb-4 rounded-2xl bg-sky-soft px-4 py-3 font-medium text-[#1d4fb3]">
+            {/* relativeTime gives "today", "3 days ago", or a date after a month */}
+            You already decoded this bill{result.previousAt ? ` ${/\d{4}/.test(relativeTime(result.previousAt)) ? "on " : ""}${relativeTime(result.previousAt)}` : ""}, so we updated that entry instead of saving a second copy.
+          </p>
+        )}
         {result && <AnalysisView key={result.id} analysis={result.analysis} id={result.id} title={result.title} createdAt={result.createdAt} />}
       </div>
     </>

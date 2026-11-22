@@ -823,3 +823,9 @@ function dataLabelOf(p: Plan): string {
   if (typeof p.dataGB === "number") return p.dataGB >= 1000 ? `${p.dataGB / 1000}TB` : `${p.dataGB}GB`;
   return "similar";
 }
+
+/** The same bill pasted twice, ignoring spacing and blank lines (a re-upload or a stray newline is still the same bill). */
+export function sameBillText(a: string, b: string): boolean {
+  const norm = (t: string) => t.split(/\r?\n/).map((l) => l.replace(/\s+/g, " ").trim()).filter(Boolean).join("\n");
+  return norm(a) === norm(b);
+}

@@ -1,7 +1,7 @@
-import { and, desc, eq } from "drizzle-orm";
+import { desc, eq } from "drizzle-orm";
 import { db } from "@/db";
 import { billAnalyses } from "@/db/schema";
-import { decodeBill } from "@/lib/decoder";
+import { decodeBill, sameBillText } from "@/lib/decoder";
 import { isProviderId } from "@/lib/providers";
 import { ensureSchema, getUserId, jsonError, num, readJson, str } from "@/lib/server";
 
@@ -48,10 +48,12 @@ export async function POST(req: Request) {
 
   // Decoding the same text with the same answers again refreshes the existing entry instead of saving a duplicate.
   const inputs = { provider, promisedPrice, usualAmount };
-  const same = await db
-    .select({ id: billAnalyses.id, inputs: billAnalyses.inputs })
+  // shortcut: compares in JS against every bill this browser saved; fine at tens per person, hash the text if that grows
+  const mine = await db
+    .select({ id: billAnalyses.id, rawText: billAnalyses.rawText, inputs: billAnalyses.inputs, createdAt: billAnalyses.createdAt })
     .from(billAnalyses)
-    .where(and(eq(billAnalyses.userId, userId), eq(billAnalyses.rawText, text)));
+    .where(eq(billAnalyses.userId, userId));
+  const same = mine.filter((r) => sameBillText(r.rawText, text));
   // Compare field by field: Postgres jsonb reorders keys, so stringified JSON never matches.
   const dup = same.find((r) => {
     const i = (r.inputs ?? {}) as Partial<typeof inputs>;
@@ -63,7 +65,7 @@ export async function POST(req: Request) {
       .set({ title, provider: analysis.meta.provider, source, result: analysis, total: analysis.totals.total, score: analysis.score, createdAt: new Date() })
       .where(eq(billAnalyses.id, dup.id))
       .returning({ id: billAnalyses.id, createdAt: billAnalyses.createdAt });
-    return Response.json({ id: row.id, title, createdAt: row.createdAt, analysis, reused: true });
+    return Response.json({ id: row.id, title, createdAt: row.createdAt, analysis, reused: true, previousAt: dup.createdAt });
   }
 
   const [row] = await db

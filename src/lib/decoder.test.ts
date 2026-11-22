@@ -1,6 +1,6 @@
 import { test } from "node:test";
 import assert from "node:assert/strict";
-import { billMonthOf, decodeBill } from "./decoder.ts";
+import { billMonthOf, decodeBill, sameBillText } from "./decoder.ts";
 
 // Redacted from a real Unifi customer's bills (Aug and Sep 2026): account one bill behind, reconnection fee each month.
 const AUG = `Unifi bill — Bill Date: 07 Aug 2026
@@ -88,4 +88,10 @@ test("the bill month is read from word dates as well as numeric ones", () => {
   assert.equal(billMonthOf({ period: "01 Ogos 2026 - 31 Ogos 2026" }), "2026-08");
   assert.equal(billMonthOf({ billDate: "September 2026" }), "2026-09");
   assert.equal(billMonthOf({ billDate: "soon" }), undefined);
+});
+
+test("sameBillText ignores spacing and blank lines, not content", () => {
+  assert.ok(sameBillText("Monthly fee 139.00\nSST 8.34", "  Monthly   fee 139.00\r\n\n\nSST 8.34\n"));
+  assert.ok(!sameBillText("Monthly fee 139.00\nSST 8.34", "Monthly fee 149.00\nSST 8.34"));
+  assert.ok(!sameBillText("Monthly fee 139.00", "Monthly fee 139.00\nLate payment charge 10.00"));
 });
